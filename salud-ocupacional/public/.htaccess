@@ -1,0 +1,6 @@
+Options FollowSymLinks
+RewriteEngine on
+
+RewriteRule !\.(js|ico|gif|jpg|pdf|zip|png|css|php|tar|htc|swf)$ index.php
+php_flag magic:quotes:gpc off
+php_flag register:globals off

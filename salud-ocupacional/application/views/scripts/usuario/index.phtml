@@ -1,0 +1,1597 @@
+<div id="divBarraTitulo">
+    Módulo de Usuarios
+</div>
+<div id="divBarraHerramientas">
+    <div class="divIzquierda" style="width: 70% !important">
+        <select name="selUsuarios" id="selUsuarios">
+            <option value="1">Ver Usuarios</option>
+            <option value="2">Ver Reemplazos</option>
+        </select>
+        <select name="selActivos" id="selActivos">
+            <option value="1">Ver Activos</option>
+            <option value="0">Ver todos</option>
+            <option value="2">Ver Inactivos</option>
+        </select> | 
+        <select id="selCompaniaUsuarioFiltro" name="selCompaniaUsuarioFiltro">
+            <?php 
+            foreach($this->rstListarCompania as $row){
+                if($row["idCompania"] == $this->idCompania){
+                    echo '<option value="'.$row["idCompania"].'">'.$row["nombre"].'</option>';
+                    break;
+                }
+            }
+            foreach($this->rstListarCompania as $row){
+                if($row["idCompania"] != $this->idCompania){
+                    echo '<option value="'.$row["idCompania"].'">'.$row["nombre"].'</option>';
+                }
+            }
+            ?>
+        </select>
+        <select id="selLocalidadUsuarioFiltro" name="selLocalidadUsuarioFiltro">
+            <?php
+            foreach($this->rstListarLocalidad as $row){
+                if($row["idLocalidad"] == $this->idLocalidad){
+                    echo '<option value="'.$row["idLocalidad"].'">'.$row["nombre"].'</option>';
+                    break;
+                }
+            }
+            foreach($this->rstListarLocalidad as $row){
+                if($row["idLocalidad"] != $this->idLocalidad){
+                    echo '<option value="'.$row["idLocalidad"].'">'.$row["nombre"].'</option>';
+                }
+            }
+            ?>
+        </select>
+        <div class="divCargadorPequeno" style="display:none"> <img src="/images/cargando.gif" /></div>
+         | 
+        <?php if(isset($this->perEsp[2])){ ?><button name="btnNuevo" id="btnNuevo">Nuevo Usuario</button><?php } ?>
+        <button name="btnActualizar" id="btnActualizar">Actualizar</button>
+    </div>
+    <div class="divDerecha" style="width: 30% !important">
+        <div id="divMensajeGeneral" class="divDialogTitulo ui-state-highlight ui-corner-all oculto">
+        </div>
+    </div>
+</div>
+<div id="divGrilla">
+    <table id="jqtblContenido"></table>
+    <div id="jqdivPaginado"></div>
+</div>
+<?php if(isset($this->perEsp[3]) || isset($this->perEsp[4]) || isset($this->perEsp[5]) ||
+         isset($this->perEsp[6]) || isset($this->perEsp[7]) || isset($this->perEsp[9])){ ?>
+<div class="contextMenu" id="MenuJqGrid">
+    <ul>
+        <?php if(isset($this->perEsp[3])){ ?><li id="modificar">Modificar</li><?php } ?>
+        <?php if(isset($this->perEsp[4])){ ?><li id="permisos">Permisos</li><?php } ?>
+        <?php if(isset($this->perEsp[3]) || isset($this->perEsp[4])){ ?><li id="mh1" class="divLineaContextmenu"></li><?php } ?>
+        <?php if(isset($this->perEsp[5])){ ?><li id="clonar">Clonar</li><?php } ?>
+        <?php if(isset($this->perEsp[6])){ ?><li id="asignar">Asignar reemplazo</li><?php } ?>
+        <?php if(isset($this->perEsp[5]) || isset($this->perEsp[6])){ ?><li id="mh2" class="divLineaContextmenu"></li><?php } ?>
+        <?php if(isset($this->perEsp[7])){ ?><li id="activar">Activar / Desactivar</li> <?php } ?>
+        <?php if(isset($this->perEsp[9])){ ?><li id="eliminar">Eliminar</li><?php } ?>
+    </ul>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[10]) || isset($this->perEsp[11])){ ?>
+<div class="contextMenu" id="MenuJqSubGrid">
+    <ul>
+        <?php if(isset($this->perEsp[10])){ ?><li id="modificar">Modificar</li><?php } ?>
+        <?php if(isset($this->perEsp[10])){ ?><li id="mh2" class="divLineaContextmenu"></li><?php } ?>
+        <?php if(isset($this->perEsp[11])){ ?><li id="eliminar">Eliminar</li><?php } ?>
+    </ul>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[2])){ ?>
+<div id="dialogNuevoUsuario" title="Nuevo Usuario" class="dialogForms" style="overflow: hidden"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Ingrese la información requerida:
+    </div>
+    <div id="divDialogContenido">
+        <form action="" method="post" id="frmNuevoUsuario" name="frmNuevoUsuario">
+            <table id="tblNuevoUsuario" style="width:349px">
+                <tr>
+                    <td width="349" class="txtCen" colspan="3">
+                        <div class="txtCen" id="divMensaje">&nbsp;</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Compañia</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq">
+                        <select id="selCompaniaUsuario" name="selCompaniaUsuario" class="validate[required]">
+                            <option value="">Seleccione</option>
+                            <?php
+                            foreach($this->rstListarCompania as $row){
+                                echo '<option value="'.$row["idCompania"].'">'.$row["nombre"].'</option>';
+                            }
+                            ?>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Localidad</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq">
+                        <select id="selLocalidadUsuario" name="selLocalidadUsuario" class="validate[required]">
+                            <option value="">Seleccione</option>
+                        </select>
+                        <div class="divCargadorPequeno" style="display:none"> <img src="/images/cargando.gif" /></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Apellidos</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtApellidos" name="txtApellidos" maxlength="30" disabled="disabled" class="validate[required, minSize[3],custom[onlyLetterSp]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Nombres</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtNombres" name="txtNombres" maxlength="30" readonly="readonly" class="validate[required, minSize[3],custom[onlyLetterSp]]" /></td>
+                </tr>                
+                <tr>
+                    <td width="129" class="txtDer">DNI</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtDNI" name="txtDNI" maxlength="8" readonly="readonly" class="validate[required, minSize[8],custom[integer]]" /></td>
+                </tr>                
+                <tr>
+                    <td width="129" class="txtDer">Título o Puesto</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtTitulo" name="txtTitulo" maxlength="30" class="validate[minSize[3]]" /></td>
+                </tr>                
+                <tr>
+                    <td width="129" class="txtDer">N° Colegiatura</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtNColegiatura" name="txtNColegiatura" maxlength="30" class="validate[minSize[2],custom[integer]]" /></td>
+                </tr>                
+                <tr>
+                    <td width="129" class="txtDer">Usuario</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtUsuario" name="txtUsuario" maxlength="30" class="validate[required, minSize[5]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Clave</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="password" id="txtClave" name="txtClave" maxlength="15" class="validate[required, minSize[6]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Repita la clave</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="password" id="txtClaveCopia" name="txtClaveCopia" maxlength="15" class="validate[required, minSize[6], equals[txtClave]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Correo</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtCorreo" name="txtCorreo" maxlength="80" class="validate[required, custom[email]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Tipo de Usuario</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq">
+                        <select id="selTipoUsuario" name="selTipoUsuario">
+                            <option value="2">Normal</option>
+                            <option value="1">Administrador</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr id="trRol">
+                    <td width="129" class="txtDer">Rol de Usuario</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq">
+                        <select id="selRolUsuario" name="selRolUsuario">
+                            <?php
+                            foreach($this->rstListarRol as $row){
+                                echo '<option value="'.$row["idRol"].'">'.$row["nombre"].'</option>';
+                            }
+                            ?>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[3])){ ?>
+<div id="dialogModificarUsuario" title="Modificar Usuario" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Ingrese la información requerida:
+    </div>
+    <div id="divDialogContenido">
+        <form action="" method="post" id="frmModificarUsuario" name="frmModificarUsuario">
+            <table id="tblModificarUsuario" style="width:349px">
+                <tr>
+                    <td width="349" class="txtCen" colspan="3">
+                        <div class="txtCen" id="divMensaje">&nbsp;</div>
+                        <input type="hidden" id="hdnIdUsuario" name="hdnIdUsuario" />
+                        <input type="hidden" id="hdnOpcion" name="hdnOpcion" value="2" />
+                    </td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Usuario</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtUsuario" name="txtUsuario" maxlength="30" readonly="readonly" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Clave</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="password" id="txtClaveM" name="txtClaveM" maxlength="15" class="validate[minSize[6]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Repita la clave</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="password" id="txtClaveCopia" name="txtClaveCopia" maxlength="15" class="validate[minSize[6], equals[txtClaveM]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Correo</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtCorreo" name="txtCorreo" maxlength="80" class="validate[required, custom[email]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Nombres</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtNombres" name="txtNombres" maxlength="30" readonly="readonly" class="validate[required, minSize[3],custom[onlyLetterSp]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Apellidos</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtApellidos" name="txtApellidos" maxlength="30" readonly="readonly" class="validate[required, minSize[3],custom[onlyLetterSp]]" /></td>
+                </tr>                
+                <tr>
+                    <td width="129" class="txtDer">DNI</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtDNI" name="txtDNI" maxlength="8" readonly="readonly" class="validate[required, minSize[8],custom[integer]]" /></td>
+                </tr>                
+                <tr>
+                    <td width="129" class="txtDer">Título o Puesto</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtTitulo" name="txtTitulo" maxlength="30" class="validate[minSize[3]]" /></td>
+                </tr>                
+                <tr>
+                    <td width="129" class="txtDer">N° Colegiatura</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtNColegiatura" name="txtNColegiatura" maxlength="30" class="validate[minSize[2],custom[integer]]" /></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[9])){ ?>
+<div id="dialogEliminarUsuario" title="Eliminar Usuario" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        ¿Está seguro de eliminar este registro?
+    </div>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[11])){ ?>
+<div id="dialogEliminarUsuarioReemplazo" title="Eliminar Reemplazo" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        ¿Está seguro de eliminar este registro?
+    </div>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[4])){ ?>
+<div id="dialogPermisoUsuario" title="Permisos Usuario" class="dialogForms"> 
+    <form action="" method="post" id="frmPermisosUsuario" name="frmPermisosUsuario">
+        <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+            Modificando permisos para: <strong><span id="spanCompania"></span> -> <span id="spanLocalidad"></span></strong>
+            <input type="checkbox" id="chkPrincipal" name="chkPrincipal" /> <label for="chkPrincipal">¿Rol principal?</label>
+        </div>
+        <div id="divDialogContenido">
+            <input type="hidden" id="hdnIdUsuario" name="hdnIdUsuario" />
+            <input type="hidden" id="hdnIdCompania" name="hdnIdCompania" />
+            <input type="hidden" id="hdnIdLocalidad" name="hdnIdLocalidad" />
+            <input type="hidden" id="hdnIdRol" name="hdnIdRol" />
+            <input type="hidden" id="hdnIdUsuarioRol" name="hdnIdUsuarioRol" />
+            <input type="hidden" id="hdnFlgPrincipal" name="hdnFlgPrincipal" />
+            <input type="hidden" id="hdnOpcion" name="hdnOpcion" value="1" />
+            <div id="divCompaniasLocalidadesTitulo">
+                Compañias / Localidades
+            </div>
+            <div id="divModulosPermisosTitulo">
+                <div style="float:left; width: 285px">
+                    Módulos / Permisos
+                </div>
+                <div style="float:left; width: 180px">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;Activar.
+                </div>
+            </div>
+            <div id="divCompaniasLocalidades">
+            </div>
+            <div id="divModulosPermisos">
+                <div id="divModulos">
+                </div>
+                <div id="divPermisos">
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[6])){ ?>
+<div id="dialogAsignarUsuario" title="Asignar Reemplazo" class="dialogForms" style="overflow: hidden"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Ingrese la información requerida:
+    </div>
+    <div id="divDialogContenido">
+        <form action="" method="post" id="frmAsignarUsuario" name="frmAsignarUsuario">
+            <table id="tblAsignarUsuario" style="width:349px">
+                <tr>
+                    <td width="349" class="txtCen" colspan="3">
+                        <div class="txtCen" id="divMensaje">&nbsp;</div>
+                        <input type="hidden" id="hdnIdUsuario" name="hdnIdUsuario" />
+                        <input type="hidden" id="hdnIdUsuarioReemplazo" name="hdnIdUsuarioReemplazo" />
+                    </td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Apellidos</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtApellidos" name="txtApellidos" maxlength="30" class="validate[required, minSize[3],custom[onlyLetterSp]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Nombres</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtNombres" name="txtNombres" maxlength="30" class="validate[required, minSize[3],custom[onlyLetterSp]]" /></td>
+                </tr>                
+                <tr>
+                    <td width="129" class="txtDer">DNI</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtDNI" name="txtDNI" maxlength="8" class="validate[required, minSize[8],custom[integer]]" /></td>
+                </tr>                
+                <tr>
+                    <td width="129" class="txtDer">Título o Puesto</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtTitulo" name="txtTitulo" maxlength="30" class="validate[minSize[3]]" /></td>
+                </tr>                
+                <tr>
+                    <td width="129" class="txtDer">N° Colegiatura</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtNColegiatura" name="txtNColegiatura" maxlength="30" class="validate[minSize[2],custom[integer]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Usuario</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtUsuario" name="txtUsuario" maxlength="30" class="validate[required, minSize[5]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Clave</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="password" id="txtClaveA" name="txtClaveA" maxlength="15" class="validate[required, minSize[6]]" /></td>
+                </tr>                
+                <tr>
+                    <td width="129" class="txtDer">Repita la clave</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="password" id="txtClaveCopia" name="txtClaveCopia" maxlength="15" class="validate[required, minSize[6], equals[txtClaveA]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Correo</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtCorreo" name="txtCorreo" maxlength="80" class="validate[required, custom[email]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Fecha Inicio</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtFechaInicio" name="txtFechaInicio" readonly class="validate[required] datepicker" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Fecha Fin</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtFechaFin" name="txtFechaFin" readonly class="validate[required] datepicker" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Motivo</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtDescripcion" name="txtDescripcion" maxlength="50" /></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[10])){ ?>
+<div id="dialogModificarUsuarioReemplazo" title="Modificar Reemplazo" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Ingrese la información requerida:
+    </div>
+    <div id="divDialogContenido">
+        <form action="" method="post" id="frmModificarUsuarioReemplazo" name="frmModificarUsuarioReemplazo">
+            <table id="tblAsignarUsuario" style="width:349px">
+                <tr>
+                    <td width="349" class="txtCen" colspan="3">
+                        <div class="txtCen" id="divMensaje">&nbsp;</div>
+                        <input type="hidden" id="hdnIdUsuarioReemplazo" name="hdnIdUsuarioReemplazo" />
+                        <input type="hidden" id="hdnOpcion" name="hdnOpcion" value="2" />
+                    </td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Fecha Inicio</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtFechaInicioM" name="txtFechaInicioM" readonly class="validate[required] datepicker" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Fecha Fin</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtFechaFinM" name="txtFechaFinM" readonly class="validate[required] datepicker" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Motivo</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtDescripcion" name="txtDescripcion" maxlength="50" /></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[5])){ ?>
+<div id="dialogClonarUsuario" title="Clonar usuario" class="dialogForms" style="overflow: hidden"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Ingrese la información requerida:
+    </div>
+    <div id="divDialogContenido">
+        <form action="" method="post" id="frmClonarUsuario" name="frmClonarUsuario">
+            <table id="tblClonarUsuario" style="width:349px">
+                <tr>
+                    <td width="349" class="txtCen" colspan="3">
+                        <div class="txtCen" id="divMensaje">&nbsp;</div>
+                        <input type="hidden" id="hdnIdUsuario" name="hdnIdUsuario" />
+                        <input type="hidden" id="hdnIdCompania" name="hdnIdCompania" />
+                        <input type="hidden" id="hdnIdLocalidad" name="hdnIdLocalidad" />
+                        <input type="hidden" id="hdnIdUsuarioReemplazo" name="hdnIdUsuarioReemplazo" />
+                    </td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Apellidos</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtApellidos" name="txtApellidos" maxlength="30" class="validate[required, minSize[3],custom[onlyLetterSp]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Nombres</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtNombres" name="txtNombres" readonly="readonly" maxlength="30" class="validate[required, minSize[3],custom[onlyLetterSp]]" /></td>
+                </tr>                
+                <tr>
+                    <td width="129" class="txtDer">DNI</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtDNI" name="txtDNI" readonly="readonly" maxlength="8" class="validate[required, minSize[8],custom[integer]]" /></td>
+                </tr>                
+                <tr>
+                    <td width="129" class="txtDer">Título o Puesto</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtTitulo" name="txtTitulo" maxlength="30" class="validate[minSize[3]]" /></td>
+                </tr>                
+                <tr>
+                    <td width="129" class="txtDer">N° Colegiatura</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtNColegiatura" name="txtNColegiatura" maxlength="30" class="validate[minSize[2],custom[integer]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Usuario</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtUsuario" name="txtUsuario" maxlength="30" class="validate[required, minSize[5]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Clave</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="password" id="txtClaveC" name="txtClaveC" maxlength="15" class="validate[required, minSize[6]]" /></td>
+                </tr>                
+                <tr>
+                    <td width="129" class="txtDer">Repita la clave</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="password" id="txtClaveCopia" name="txtClaveCopia" maxlength="15" class="validate[required, minSize[6], equals[txtClaveC]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Correo</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtCorreo" name="txtCorreo" maxlength="80" class="validate[required, custom[email]]" /></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+<?php } ?>
+<script type="text/javascript">
+$(document).ready(function(){
+    <?php if(isset($this->perEsp[5])){ ?>
+    var objDCU = "#dialogClonarUsuario";
+    $(objDCU + " #txtTitulo").autocomplete({
+        source: function( request, response ) {
+            $.ajax({
+                url: "/evaluacion/puestoautocompletar/",
+                dataType: "json",
+                data: { term: request.term },
+                success: function(data) { response($.map(data, function(item) { return { label: $.trim(item.Puesto) }; })); }
+            });
+        },
+        minLength: 3
+    });
+    $(objDCU + " #txtApellidos").autocomplete({
+        source: function( request, response ) {
+            $.ajax({
+                url: "/usuario/listarrrhh/",
+                dataType: "json",
+                data: {
+                    term: request.term, 
+                    compania: $(objDCU + " #hdnIdCompania").val(),
+                    localidad: $(objDCU + " #hdnIdLocalidad").val()
+                },
+                success: function(data) {
+                    response($.map(data, function(item) {
+                        return {
+                            label: item.Ap_Paterno + " " + item.Ap_Materno + " " + item.Nombres,
+                            id: item.Id_cia,
+                            nombres: item.Nombres,
+                            apellidosp: item.Ap_Paterno,
+                            apellidosm: item.Ap_Materno,
+                            email: item.email,
+                            dni: item.DNI,
+                            puesto: item.Puesto
+                        };
+                    }));
+                }
+            });
+        },
+        minLength: 2,
+        select: function(event, ui) {
+            if($.trim(ui.item.email) != ""){
+                var x = ui.item.email.split("@");
+                $(objDCU + " #txtUsuario").val(x[0]);
+                $(objDCU + " #txtCorreo").val(ui.item.email);
+            }
+            $(objDCU + " #txtNombres").val(ui.item.nombres);
+            $(objDCU + " #txtDNI").val(ui.item.dni);
+            $(objDCU + " #txtTitulo").val(ui.item.puesto);
+            setTimeout(function(){ $(objDCU + " #txtApellidos").val(ui.item.apellidosp + " " + ui.item.apellidosm); },100);
+            $(objDCU + " #txtApellidos").attr("readonly", true);            
+            $(objDCU + " #txtUsuario").focus();
+        }
+    });
+     
+    $(objDCU).dialog({
+        closeOnEscape: false,
+        autoOpen: false,
+        height: 480,
+        width: 370,
+        modal: true,
+        resizable: false,
+        open: function(){
+            js_resetForm(objDCU);
+            $(objDCU + " #txtApellidos").removeAttr("readonly").focus();
+            js_validarDCU();
+            var divMensaje = $(objDCU + " #divMensaje");
+            divMensaje.html("&nbsp;");
+        },
+        buttons:{
+            "Guardar": function(){ $("#frmClonarUsuario").submit(); },
+            "Cancelar": function(){ $(this).dialog("close"); }
+        },
+        close: function() { $("#frmClonarUsuario").validationEngine("hideAll"); }
+    });
+    function js_validarDCU(){
+        $("#frmClonarUsuario").validationEngine("attach");
+        $("#frmClonarUsuario").validationEngine("attach", {
+                onValidationComplete: function(form, status){
+                    if(status){
+                        var divMensaje = $("#frmClonarUsuario #divMensaje");
+                        divMensaje.html("&nbsp;");
+                        $.ajax({
+                            url: '/usuario/clonar/',
+                            type: "POST",
+                            data: $("#frmClonarUsuario").serialize(),
+                            beforeSend:function(){
+                                $("#frmClonarUsuario").validationEngine("detach");
+                                divMensaje.html("<img src='/images/loading.gif' />");
+                            },
+                            success: function(data) {
+                                var objs = $.parseJSON(data);
+                                if(objs.status == 1){
+                                    $("#jqtblContenido").trigger("reloadGrid");
+                                    $("#dialogClonarUsuario").dialog("close");
+                                    js_mensajeGeneral(data);
+                                }else{
+                                    js_validarDCU();
+                                    divMensaje.attr("class", "txtCen error-text");
+                                    divMensaje.html(objs.message);
+                                }
+                            }
+                        });
+                    }
+                },
+                promptPosition : "topLeft", 
+                scroll: false,
+                autoHidePrompt: true,
+                autoHideDelay: 1000
+            }
+        );
+    }
+    <?php } ?>
+    <?php if(isset($this->perEsp[2])){ ?>
+    var objDNU = "#dialogNuevoUsuario";
+    $(objDNU).dialog({
+        closeOnEscape: false,
+        autoOpen: false,
+        height: 600,
+        width: 370,
+        modal: true,
+        resizable: false,
+        open: function(){
+            js_resetForm(objDNU);
+            $(objDNU + " #selCompaniaUsuario").focus();
+            $(objDNU + " #txtApellidos").attr("disabled", true);
+            $(objDNU + " #selLocalidadUsuario").html("<option>Seleccione</option>"); 
+            js_validarDNU();
+            var divMensaje = $(objDNU + " #divMensaje");
+            divMensaje.html("&nbsp;");
+        },
+        buttons:{
+            "Guardar": function(){ $("#frmNuevoUsuario").submit(); },
+            "Cancelar": function(){ $(this).dialog("close"); }
+        },
+        close: function() { $("#frmNuevoUsuario").validationEngine("hideAll"); }
+    });
+    $(objDNU + " #txtTitulo").autocomplete({
+        source: function( request, response ) {
+            $.ajax({
+                url: "/evaluacion/puestoautocompletar/",
+                dataType: "json",
+                data: { term: request.term },
+                success: function(data) { response($.map(data, function(item) { return { label: $.trim(item.Puesto) }; })); }
+            });
+        },
+        minLength: 3
+    });
+    $(objDNU + " #txtApellidos").autocomplete({
+        source: function( request, response ) {
+            $.ajax({
+                url: "/usuario/listarrrhh/",
+                dataType: "json",
+                data: {
+                    term: request.term, 
+                    compania: $(objDNU + " #selCompaniaUsuario").val(),
+                    localidad: $(objDNU + " #selLocalidadUsuario").val()
+                },
+                success: function(data) {
+                    response($.map(data, function(item) {
+                        return {
+                            label: item.Ap_Paterno + " " + item.Ap_Materno + " " + item.Nombres,
+                            id: item.Id_cia,
+                            nombres: item.Nombres,
+                            apellidosp: item.Ap_Paterno,
+                            apellidosm: item.Ap_Materno,
+                            email: item.email,
+                            dni: item.DNI,
+                            puesto: item.Puesto
+                        };
+                    }));
+                }
+            });
+        },
+        minLength: 2,
+        select: function(event, ui) {
+            if($.trim(ui.item.email) != ""){
+                var x = ui.item.email.split("@");
+                $(objDNU + " #txtUsuario").val(x[0]);
+                $(objDNU + " #txtCorreo").val(ui.item.email);
+            }
+            $(objDNU + " #txtNombres").val(ui.item.nombres);
+            $(objDNU + " #txtDNI").val(ui.item.dni);
+            $(objDNU + " #txtTitulo").val(ui.item.puesto);
+            setTimeout(function(){ $(objDNU + " #txtApellidos").val(ui.item.apellidosp + " " + ui.item.apellidosm); },100);
+            $(objDNU + " #txtApellidos").attr("readonly", true);            
+            $(objDNU + " #txtUsuario").focus();
+        }
+    });
+    $("#btnNuevo")
+        .button({ icons: { primary: "ui-icon-plus" } })
+        .click(function(){
+        $(objDNU + " #hdnIdUsuarioClonar").val(""); 
+        $(objDNU).dialog("open"); 
+    });
+    
+    $("#selCompaniaUsuario").change(function(){
+        $.ajax({
+            url: '/localidad/listar/',
+            type: "POST",
+            data: $("#frmNuevoUsuario").serialize(),
+            beforeSend:function(){
+                $(".divCargadorPequeno").css("display","inline");
+                $("#selLocalidadUsuario").attr("disabled", true);
+            },
+            success: function(data) {
+                var obj = $("#selLocalidadUsuario");
+                obj.html("").append("<option value=''>Seleccione</option>");
+                $.each($.parseJSON(data), function(i,row){
+                    obj.append("<option value='"+i+"'>"+row+"</option>");
+                });
+                $(".divCargadorPequeno").css("display","none");
+                obj.attr("disabled", false);
+                $(objDNU + " #txtApellidos").attr("disabled", true).val("");
+                $(objDNU + " #txtNombres").val("");
+            }
+        }); 
+    });
+    $("#selLocalidadUsuario").change(function(){
+        if($("#selLocalidadUsuario").val() != ""){
+            $(objDNU + " #txtApellidos").removeAttr("readonly").attr("disabled", false).focus();
+        }else{
+            $(objDNU + " #txtApellidos").attr("disabled", true).val("");
+            $(objDNU + " #txtNombres").val("");
+        }
+    });
+    function js_validarDNU(){
+        $("#frmNuevoUsuario").validationEngine("attach");
+        $("#frmNuevoUsuario").validationEngine("attach", {
+                onValidationComplete: function(form, status){
+                    if(status){
+                        var divMensaje = $("#frmNuevoUsuario #divMensaje");
+                        divMensaje.html("&nbsp;");
+                        $.ajax({
+                            url: '/usuario/registrar/',
+                            type: "POST",
+                            data: $("#frmNuevoUsuario").serialize(),
+                            beforeSend:function(){
+                                $("#frmNuevoUsuario").validationEngine("detach");
+                                divMensaje.html("<img src='/images/loading.gif' />");
+                            },
+                            success: function(data) {
+                                var objs = $.parseJSON(data);
+                                if(objs.status == 1){
+                                    $("#jqtblContenido").trigger("reloadGrid");
+                                    $("#dialogNuevoUsuario").dialog("close");
+                                    js_mensajeGeneral(data);
+                                }else{
+                                    js_validarDNU();
+                                    divMensaje.attr("class", "txtCen error-text");
+                                    divMensaje.html(objs.message);
+                                }
+                            }
+                        });
+                    }
+                },
+                promptPosition : "topLeft", 
+                scroll: false,
+                autoHidePrompt: true,
+                autoHideDelay: 1000
+            }
+        );
+    }
+    <?php } ?>
+    <?php if(isset($this->perEsp[6])){ ?>
+    var objDAU = "#dialogAsignarUsuario";
+    $(objDAU + " #txtTitulo").autocomplete({
+        source: function( request, response ) {
+            $.ajax({
+                url: "/evaluacion/puestoautocompletar/",
+                dataType: "json",
+                data: { term: request.term },
+                success: function(data) { response($.map(data, function(item) { return { label: $.trim(item.Puesto) }; })); }
+            });
+        },
+        minLength: 3
+    });
+    $(objDAU + " #txtApellidos").autocomplete({
+        source: function( request, response ) {
+            $.ajax({
+                url: "/usuario/listar/",
+                dataType: "json",
+                data: {term: request.term},
+                success: function(data) {
+                    response($.map(data, function(item) {
+                        return {
+                            label: item.apellidos,
+                            id: item.idUsuario,
+                            usuario: item.usuario,
+                            correo: item.correo,
+                            nombres: item.nombres,
+                            apellidos: item.apellidos,
+                            dni: item.dni,
+                            puesto: item.titulo,
+                            ncolegiatura: item.ncolegiatura
+                        };
+                    }));
+                }
+            });
+        },
+        minLength: 2,
+        select: function(event, ui) {
+            $(objDAU + " #hdnIdUsuarioReemplazo").val(ui.item.id);
+            $(objDAU + " #txtUsuario").val(ui.item.usuario);
+            $(objDAU + " #txtCorreo").val(ui.item.correo);
+            $(objDAU + " #txtNombres").val(ui.item.nombres);
+            $(objDAU + " #txtDNI").val(ui.item.dni);
+            $(objDAU + " #txtTitulo").val(ui.item.puesto);
+            $(objDAU + " #txtNColegiatura").val(ui.item.ncolegiatura);
+            
+            $(objDAU + " #hdnIdUsuarioReemplazo").attr("readonly",true);
+            $(objDAU + " #txtUsuario").attr("readonly",true);
+            $(objDAU + " #txtCorreo").attr("readonly",true);
+            $(objDAU + " #txtApellidos").attr("readonly",true);
+            $(objDAU + " #abbrev").attr("readonly",true);
+            
+            $(objDAU + " #txtClaveA").attr("disabled",true);
+            $(objDAU + " #txtClaveCopia").attr("disabled",true);
+            $(objDAU + " #txtFechaInicio").focus();
+        }
+    });
+    
+    function js_limpiarasignar(){
+        $(objDAU + " #hdnIdUsuarioReemplazo").val("");
+        $(objDAU + " #txtUsuario").val("");
+        $(objDAU + " #txtCorreo").val("");
+        $(objDAU + " #txtNombres").val("");
+        $(objDAU + " #txtApellidos").val("").focus();
+
+        $(objDAU + " #hdnIdUsuarioReemplazo").attr("readonly",false);
+        $(objDAU + " #txtUsuario").attr("readonly",false);
+        $(objDAU + " #txtCorreo").attr("readonly",false);
+        $(objDAU + " #txtApellidos").attr("readonly",false);
+        $(objDAU + " #abbrev").attr("readonly",false);
+
+        $(objDAU + " #txtClaveA").attr("disabled",false);
+        $(objDAU + " #txtClaveCopia").attr("disabled",false);
+    }
+    $(objDAU).dialog({
+        closeOnEscape: false,
+        autoOpen: false,
+        height: 550,
+        width: 370,
+        modal: true,
+        resizable: false,
+        open: function(){
+            js_resetForm(objDAU);
+            $(objDAU + " #txtApellidos").focus();
+            js_validarDAU();
+            var divMensaje = $(objDAU + " #divMensaje");
+            divMensaje.html("&nbsp;");
+        },
+        buttons:{
+            "Guardar": function(){ $("#frmAsignarUsuario").submit(); },
+            "Cancelar": function(){ $(this).dialog("close"); },
+            "Limpiar": function(){ js_limpiarasignar(); }
+        },
+        close: function() { $("#frmAsignarUsuario").validationEngine("hideAll"); js_limpiarasignar(); }
+    });
+    function js_validarDAU(){
+        $("#frmAsignarUsuario").validationEngine("attach");
+        $("#frmAsignarUsuario").validationEngine("attach", {
+                onValidationComplete: function(form, status){
+                    if(status){
+                        var divMensaje = $("#frmAsignarUsuario #divMensaje");
+                        divMensaje.html("&nbsp;");
+                        $.ajax({
+                            url: '/usuario/asignar/',
+                            type: "POST",
+                            data: $("#frmAsignarUsuario").serialize(),
+                            beforeSend:function(){
+                                $("#frmAsignarUsuario").validationEngine("detach");
+                                divMensaje.html("<img src='/images/loading.gif' />");
+                            },
+                            success: function(data) {
+                                var objs = $.parseJSON(data);
+                                if(objs.status == 1){
+                                    $("#jqtblContenido").trigger("reloadGrid");
+                                    $("#dialogAsignarUsuario").dialog("close");
+                                    js_mensajeGeneral(data);
+                                }else{
+                                    js_validarDAU();
+                                    divMensaje.attr("class", "txtCen error-text");
+                                    divMensaje.html(objs.message);
+                                }
+                            }
+                        });
+                    }
+                },
+                promptPosition : "topLeft", 
+                scroll: false,
+                autoHidePrompt: true,
+                autoHideDelay: 1000
+            }
+        );
+    }
+    <?php } ?>
+    <?php if(isset($this->perEsp[3])){ ?>
+    var objDMU = "#dialogModificarUsuario";
+    $(objDMU).dialog({
+        closeOnEscape: false,
+        autoOpen: false,
+        height: 480,
+        width: 370,
+        modal: true,
+        resizable: false,
+        open: function(){
+            js_resetForm(objDMU);
+            var divMensaje = $("#divMensaje");
+            divMensaje.html("&nbsp;");
+        },
+        buttons:{
+            "Guardar": function(){ $("#frmModificarUsuario").submit(); },
+            "Cancelar": function(){ $(this).dialog("close"); }
+        },
+        close: function() { $("#frmModificarUsuario").validationEngine("hideAll"); }
+    });
+    function js_validarDMU(){
+        $(objDMU + " #txtTitulo").autocomplete({
+            source: function( request, response ) {
+                $.ajax({
+                    url: "/evaluacion/puestoautocompletar/",
+                    dataType: "json",
+                    data: { term: request.term },
+                    success: function(data) { response($.map(data, function(item) { return { label: $.trim(item.Puesto) }; })); }
+                });
+            },
+            minLength: 3
+        });
+        $("#frmModificarUsuario").validationEngine("attach");
+        $("#frmModificarUsuario").validationEngine("attach", {
+                onValidationComplete: function(form, status){
+                    if(status){
+                        var divMensaje = $("#frmModificarUsuario #divMensaje");
+                        divMensaje.html("&nbsp;");
+                        $.ajax({
+                            url: '/usuario/modificar/',
+                            type: "POST",
+                            data: $("#frmModificarUsuario").serialize(),
+                            beforeSend:function(){
+                                $("#frmModificarUsuario").validationEngine("detach");
+                                divMensaje.html("<img src='/images/loading.gif' />");
+                            },
+                            success: function(data) {
+                                var objs = $.parseJSON(data);
+                                if(objs.status == 1){
+                                    $("#jqtblContenido").trigger("reloadGrid");
+                                    $("#dialogModificarUsuario").dialog("close");
+                                    js_mensajeGeneral(data);
+                                    divMensaje.html("&nbsp;");
+                                }else{
+                                    js_validarDMU();
+                                    divMensaje.attr("class", "txtCen error-text");
+                                    divMensaje.html(objs.message);
+                                }
+                            }
+                        });
+                    }
+                },
+                promptPosition : "topLeft", 
+                scroll: false,
+                autoHidePrompt: true,
+                autoHideDelay: 1000
+            }
+        );
+    }
+    <?php } ?>
+    <?php if(isset($this->perEsp[10])){ ?>
+    var objDMUR = "#dialogModificarUsuarioReemplazo";
+    $(objDMUR).dialog({
+        closeOnEscape: false,
+        autoOpen: false,
+        height: 330,
+        width: 370,
+        modal: true,
+        resizable: false,
+        open: function(){
+            js_resetForm(objDMUR);
+            var divMensaje = $("#divMensaje");
+            divMensaje.html("&nbsp;");
+        },
+        buttons:{
+            "Guardar": function(){ $("#frmModificarUsuarioReemplazo").submit(); },
+            "Cancelar": function(){ $(this).dialog("close"); }
+        },
+        close: function() { $("#frmModificarUsuarioReemplazo").validationEngine("hideAll");
+            $( "#txtFechaInicioM" ).datepicker( "destroy" ); 
+            $( "#txtFechaFinM" ).datepicker( "destroy" ); 
+        }
+    });
+    function js_validarDMUR(){
+        $("#frmModificarUsuarioReemplazo").validationEngine("attach");
+        $("#frmModificarUsuarioReemplazo").validationEngine("attach", {
+                onValidationComplete: function(form, status){
+                    if(status){
+                        var divMensaje = $("#frmModificarUsuarioReemplazo #divMensaje");
+                        divMensaje.html("&nbsp;");
+                        $.ajax({
+                            url: '/usuario/modificarreemplazo/',
+                            type: "POST",
+                            data: $("#frmModificarUsuarioReemplazo").serialize(),
+                            beforeSend:function(){
+                                $("#frmModificarUsuarioReemplazo").validationEngine("detach");
+                                divMensaje.html("<img src='/images/loading.gif' />");
+                            },
+                            success: function(data) {
+                                var objs = $.parseJSON(data);
+                                if(objs.status == 1){
+                                    $("#jqtblContenido").trigger("reloadGrid");
+                                    $("#dialogModificarUsuarioReemplazo").dialog("close");
+                                    js_mensajeGeneral(data);
+                                    divMensaje.html("&nbsp;");
+                                    $( "#txtFechaInicioM" ).datepicker( "destroy" ); 
+                                    $( "#txtFechaFinM" ).datepicker( "destroy" ); 
+                                }else{
+                                    js_validarDMUR();
+                                    divMensaje.attr("class", "txtCen error-text");
+                                    divMensaje.html(objs.message);
+                                }
+                            }
+                        });
+                    }
+                },
+                promptPosition : "topLeft", 
+                scroll: false,
+                autoHidePrompt: true,
+                autoHideDelay: 1000
+            }
+        );
+    }
+    <?php } ?>
+    <?php if(isset($this->perEsp[9])){ ?>
+    var objDEU = "#dialogEliminarUsuario";
+    $(objDEU).dialog({
+        closeOnEscape: false,
+        autoOpen: false,
+        height: 160,
+        width: 370,
+        modal: true,
+        resizable: false,
+        buttons:{
+            "Sí": function(){ 
+                $.ajax({
+                    url: '/usuario/eliminar/',
+                    type: "POST",
+                    data: "idUsuario=" + idUsuario,
+                    success: function(data) {
+                        $("#jqtblContenido").trigger("reloadGrid");
+                        js_mensajeGeneral(data);
+                        $(objDEU).dialog("close");
+                    }
+                });
+            },
+            "No": function(){ $(this).dialog("close"); }
+        }
+    });
+    <?php } ?>
+    <?php if(isset($this->perEsp[11])){ ?>
+    var objDEUR = "#dialogEliminarUsuarioReemplazo";
+    $(objDEUR).dialog({
+        closeOnEscape: false,
+        autoOpen: false,
+        height: 160,
+        width: 370,
+        modal: true,
+        resizable: false,
+        buttons:{
+            "Sí": function(){ 
+                $.ajax({
+                    url: '/usuario/eliminarreemplazo/',
+                    type: "POST",
+                    data: "idUsuarioReemplazo=" + idUsuario,
+                    success: function(data) {
+                        $("#jqtblContenido").trigger("reloadGrid");
+                        js_mensajeGeneral(data);
+                        $(objDEUR).dialog("close");
+                    }
+                });
+            },
+            "No": function(){ $(this).dialog("close"); }
+        }
+    });
+    <?php } ?>
+    <?php if(isset($this->perEsp[4])){ ?>
+    var objDPU = "#dialogPermisoUsuario";
+    $(objDPU).dialog({
+        closeOnEscape: false,
+        autoOpen: false,
+        height: 600,
+        width: 830,
+        modal: true,
+        resizable: false,
+        open: function(){
+            js_resetForm(objDPU);
+            var divMensaje = $("#divMensaje");
+            divMensaje.html("&nbsp;");
+        },
+        buttons:{
+            "Guardar": function(){
+                $(objDPU + " #hdnOpcion").val(2);
+                $.ajax({
+                    url: '/usuario/permiso/',
+                    type: "POST",
+                    data: $("#frmPermisosUsuario").serialize(),
+                    beforeSend:function(){
+                        $(objDPU + " .divDialogTitulo").append(" <span id='spanCargandoTemp'><img src='/images/loading.gif' /> Grabando...</span>");
+                        $(objDPU).find("input[type=checkbox]").attr("disabled",true);
+                    },
+                    success: function(data) {
+                        var objs = $.parseJSON(data);
+                        if(objs.status == 1) $(objDPU + " #spanCargandoTemp").remove();
+                        else $(objDPU + " #spanCargandoTemp").attr("class", "txtCen error-text").html(" - "+objs.message);
+                        $(objDPU + " #hdnOpcion").val(1);
+                        $(objDPU + " #hdnIdUsuarioRol").val(objs.idUsuarioRol);
+                        $(objDPU).find("input[type=checkbox]").removeAttr("disabled");
+                    }
+                });
+            },
+            "Cerrar": function(){ $(this).dialog("close"); }
+        }
+    });
+    function js_permiso(flg){
+        var contenidoaux;
+        var varData = "";
+        var idCompania = $("#frmPermisosUsuario #hdnIdCompania").val();
+        var idLocalidad = $("#frmPermisosUsuario #hdnIdLocalidad").val();
+        if(flg == 1)
+            varData = "hdnIdUsuario=" + idUsuario + "&hdnOpcion=1";
+        else
+            varData = $("#frmPermisosUsuario").serialize();
+
+        $.ajax({
+            url: '/usuario/permiso/',
+            type: "POST",
+            data: varData,
+            beforeSend:function(){
+                contenidoaux = $("#dialogPermisoUsuario #divDialogContenido").html();
+                $("#dialogPermisoUsuario #divDialogContenido").html(msjCargando);
+            },
+            success: function(data) {
+                var objs = $.parseJSON(data);
+                $(objDPU + " #divDialogContenido").html(contenidoaux);
+                $(objDPU + " #hdnIdCompania").val(objs.Generales[0].idCompania);
+                $(objDPU + " #hdnIdLocalidad").val(objs.Generales[0].idLocalidad);
+                $(objDPU + " #hdnIdUsuario").val(objs.Generales[0].idUsuario);
+                $(objDPU + " #hdnIdUsuarioRol").val(objs.Generales[0].idUsuarioRol);
+                $(objDPU + " #hdnIdRol").val(objs.Generales[0].idRol);
+                $(objDPU + " #hdnFlgPrincipal").val(objs.Generales[0].flg_principal);
+                if(objs.Generales[0].flg_principal == 1) $("#chkPrincipal").attr("checked", true);
+                else $("#chkPrincipal").attr("checked", false);
+                    
+                var objcl = $("#divCompaniasLocalidades");
+                objcl.html("");
+                var aux = "<ul>";
+                var checked = "";
+                var entrocheck = 0;
+                $.each(objs.Compania, function(i,row){
+                    if(row.idCompania == objs.Generales[0].idCompania) $("#spanCompania").html(row.nombre);
+                    aux += '<li><span>'+row.nombre+'</span>';
+                    aux += '<ul>';
+                    $.each(objs.Localidad, function(il,rowl){
+                        if(row.idCompania == rowl.idCompania){
+                            entrocheck = 0;
+                            if(rowl.idLocalidad == objs.Generales[0].idLocalidad && rowl.idCompania == objs.Generales[0].idCompania){
+                                $("#spanLocalidad").html(rowl.nombre);
+                                var extra = "background-color: #FF0000; color: #FFF";
+                            }
+                            $.each(objs.Generales, function(ie,rowe){
+                                if(rowl.idLocalidad == rowe.idLocalidad && rowl.idCompania == rowe.idCompania){
+                                    aux += '<li><input type="checkbox" checked name="localidad_'+rowl.idCompania+'_'+rowl.idLocalidad+'" value="'+rowl.idCompania+'_'+rowl.idLocalidad+'"><span style="font-weight:bold;'+extra+'">'+rowl.nombre+'</span>';
+                                    entrocheck = 1;
+                                }
+                            });
+                            if(entrocheck == 0){
+                                aux += '<li><input type="checkbox" name="localidad_'+rowl.idCompania+'_'+rowl.idLocalidad+'" value="'+rowl.idCompania+'_'+rowl.idLocalidad+'"><span>'+rowl.nombre+'</span>';
+                            }
+                        }
+                    });
+                    aux += '</ul>';
+                    aux += '</li>';
+                });          
+                aux += '</ul>';
+                objcl.append(aux);
+                js_tree($("#divCompaniasLocalidades"), "collapse", "checkbox", "select");
+
+                var objm = $("#divModulos");
+                var objp = $("#divPermisos");
+                objm.html("");
+                objp.html("");
+                var auxm = "<ul>";
+                var auxp = "";
+                entrocheck = 0;
+                $.each(objs.Modulo, function(i,row){
+                    if(row.idModuloPadre == 0){
+                        auxm += '<li><input type="checkbox" style="visibility: hidden"><span>'+row.nombre+'</span>';
+                        auxm += '<ul>';
+                        $.each(objs.Modulo, function(il,rowl){
+                            if(row.idModulo == rowl.idModuloPadre){
+                                auxm += '<li><input type="checkbox" style="visibility: hidden"><span>'+rowl.nombre+'</span>';
+                                $.each(objs.Modulo, function(ils,rowls){
+                                    if(rowl.idModulo == rowls.idModuloPadre){
+                                        auxm += '<li><input type="checkbox" style="visibility: hidden"><span>&angrt; '+rowls.nombre+'</span>';
+                                    }
+                                });
+                            }
+                        });
+                        auxm += '</ul>';
+                        auxm += '</li>';
+                        entrocheck = 0
+                        $.each(objs.Especificos, function(ie,rowe){
+                            if(row.idModulo == ie){
+                                checked = "";
+                                if(rowe.flg_leer == 1) checked = "checked";
+                                auxp += '<input type="checkbox" '+checked+' id="permiso_'+row.idModulo+'_1" name="permiso_'+row.idModulo+'_1" value="1"><br />';
+                                entrocheck = 1;
+                            }
+                        });
+                        if(entrocheck == 0){
+                            auxp += '<input type="checkbox" id="permiso_'+row.idModulo+'_1" name="permiso_'+row.idModulo+'_1" value="1"><br />';
+                        }
+
+                        $.each(objs.Modulo, function(il,rowl){
+                            if(row.idModulo == rowl.idModuloPadre){
+                                entrocheck = 0
+                                $.each(objs.Especificos, function(ie,rowe){
+                                    if(rowl.idModulo == ie){
+                                        checked = "";
+                                        if(rowe.flg_leer == 1) checked = "checked";
+                                        auxp += '<input type="checkbox" '+checked+' id="permiso_'+rowl.idModulo+'_1" name="permiso_'+rowl.idModulo+'_1" value="1"><br />';
+                                        entrocheck = 1;
+                                    }
+                                });
+                                if(entrocheck == 0){
+                                    auxp += '<input type="checkbox" id="permiso_'+rowl.idModulo+'_1" name="permiso_'+rowl.idModulo+'_1" value="1"><br />';
+                                }
+                                
+                                $.each(objs.Modulo, function(il,rowlS){
+                                    if(rowl.idModulo == rowlS.idModuloPadre){
+                                        var entrochecks = 0
+                                        $.each(objs.Especificos, function(ie,rowe){
+                                            if(rowlS.idModulo == ie){
+                                                checked = "";
+                                                if(rowe.flg_leer == 1) checked = "checked";
+                                                auxp += '<input type="checkbox" '+checked+' id="permiso_'+rowlS.idModulo+'_1" name="permiso_'+rowlS.idModulo+'_1" value="1"><br />';
+                                                entrochecks = 1;
+                                            }
+                                        });
+                                        if(entrochecks == 0){
+                                            auxp += '<input type="checkbox" id="permiso_'+rowlS.idModulo+'_1" name="permiso_'+rowlS.idModulo+'_1" value="1"><br />';
+                                        }
+                                    }
+                                });
+                                
+                            }
+                        });
+                    }
+                });
+                auxm += '</ul>';
+                objm.append(auxm);
+                objp.append(auxp);
+                js_tree($("#divModulosPermisos"), "", "", "");
+            }
+        });
+    }
+    function js_tree(obj, collapse, checkbox, select){
+        obj.tree({
+            components: [select, checkbox, collapse],
+            select: function(event, element) {
+                var x = $(element).find("input[type=checkbox]").val().split("_");
+                $("#dialogPermisoUsuario #hdnIdCompania").val(x[0]);
+                $("#dialogPermisoUsuario #hdnIdLocalidad").val(x[1]);
+                js_permiso(2);
+            },
+            onCheck: {
+                ancestors: 'checkIfFull',
+                descendants: 'check'
+            },
+            onUncheck: {
+                ancestors: 'uncheck'
+            }
+        });
+    }
+    <?php } ?>
+    eventsMenu = {
+        bindings:{
+            <?php if(isset($this->perEsp[5])){ ?>
+            'clonar':function(t){
+                idUsuario = t.id;
+                $(objDCU + " #hdnIdUsuario").val(idUsuario);
+                $(objDCU + " #hdnIdCompania").val($.trim($('#jqtblContenido').jqGrid('getCell',idUsuario,'idcompania')));
+                $(objDCU + " #hdnIdLocalidad").val($.trim($('#jqtblContenido').jqGrid('getCell',idUsuario,'idlocalidad')));                
+                $(objDCU).dialog("open");
+            },
+            <?php } ?>
+            <?php if(isset($this->perEsp[3])){ ?>
+            'modificar':function(t){
+                idUsuario = t.id;
+                var contenidoaux;
+                $(objDMU).dialog("open");
+                $.ajax({
+                    url: '/usuario/modificar/',
+                    type: "POST",
+                    data: "hdnIdUsuario=" + idUsuario + "&hdnOpcion=1",
+                    beforeSend:function(){
+                        contenidoaux = $(objDMU + " #divDialogContenido").html();
+                        $(objDMU + " #divDialogContenido").html(msjCargando);
+                    },
+                    success: function(data) {
+                        var objs = jQuery.parseJSON(data);
+                        $(objDMU + " #divDialogContenido").html(contenidoaux);
+                        $(objDMU + " #hdnIdUsuario").val(objs.idUsuario);
+                        $(objDMU + " #txtUsuario").val(objs.usuario);
+                        $(objDMU + " #txtCorreo").val(objs.correo);
+                        $(objDMU + " #txtNombres").val(objs.nombres);
+                        $(objDMU + " #txtApellidos").val(objs.apellidos);
+                        $(objDMU + " #txtDNI").val(objs.dni);
+                        $(objDMU + " #txtTitulo").val(objs.titulo);
+                        $(objDMU + " #txtNColegiatura").val(objs.ncolegiatura);
+                        $(objDMU + " #txtClaveM").focus();
+                        js_validarDMU();
+                    }
+                });
+            },
+            <?php } ?>
+            <?php if(isset($this->perEsp[6])){ ?>
+            'asignar':function(t){
+                idUsuario = t.id;
+                $(objDAU).dialog("open");
+                $(objDAU + " #hdnIdUsuario").val(idUsuario);
+                $(objDAU + " #txtFechaInicio").datepicker({
+                    defaultDate: "+1w",
+                    minDate: 0,
+                    changeMonth: true,
+                    dateFormat: "dd/mm/yy",
+                    numberOfMonths: 2,
+                    onSelect: function( selectedDate ) {
+                        $(objDAU + " #txtFechaFin").datepicker( "option", "minDate", selectedDate );
+                    }
+                });
+                $(objDAU + " #txtFechaFin").datepicker({
+                    defaultDate: "+1w",
+                    changeMonth: true,
+                    minDate: 0,
+                    dateFormat: "dd/mm/yy",
+                    numberOfMonths: 2,
+                    onSelect: function( selectedDate ) {
+                        $(objDAU + " #txtFechaInicio").datepicker( "option", "maxDate", selectedDate );
+                    }
+                });
+                
+            },
+            <?php } ?>
+            <?php if(isset($this->perEsp[9])){ ?>
+            'eliminar':function(t){
+                idUsuario = t.id;
+                $(objDEU).dialog("open");
+            },
+            <?php } ?>
+            <?php if(isset($this->perEsp[7])){ ?>
+            'activar':function(t){
+                var id = t.id;
+                $.ajax({
+                    url: '/usuario/activar/',
+                    type: "POST",
+                    data: "idUsuario=" + id,
+                    success: function(data) {
+                        $("#jqtblContenido").trigger("reloadGrid");
+                        js_mensajeGeneral(data);
+                    }
+                });
+            },
+            <?php } ?>
+            <?php if(isset($this->perEsp[4])){ ?>
+            'permisos':function(t){
+                idUsuario = t.id;
+                $(objDPU).dialog("open");
+                js_permiso(1);
+            }
+            <?php } ?>
+        },
+        onShowMenu: function(e, menu) {
+            if($("#selUsuarios").val() == 2){
+                $('#clonar', menu).remove();
+                $('#asignar', menu).remove();
+                $('#mh2', menu).remove();
+                return menu;
+            }else{
+                return menu;
+            }
+        }
+    }
+    eventsMenuSubGrid = {
+        bindings:{
+            <?php if(isset($this->perEsp[10])){ ?>
+            'modificar':function(t){
+                idUsuario = t.id;
+                var contenidoaux;
+                $(objDMUR).dialog("open");
+                $.ajax({
+                    url: '/usuario/modificarreemplazo/',
+                    type: "POST",
+                    data: "hdnIdUsuarioReemplazo=" + idUsuario + "&hdnOpcion=1",
+                    beforeSend:function(){
+                        contenidoaux = $(objDMUR + " #divDialogContenido").html();
+                        $(objDMUR + " #divDialogContenido").html(msjCargando);
+                    },
+                    success: function(data) {
+                        var objs = jQuery.parseJSON(data);
+                        $(objDMUR + " #divDialogContenido").html(contenidoaux);
+                        $(objDMUR + " #hdnIdUsuarioReemplazo").val(objs.idUsuarioReemplazo);
+                        var fecha = objs.fechainicio.split("-");
+                        fecha = fecha[2]+"/"+fecha[1]+"/"+fecha[0];
+                        $(objDMUR + " #txtFechaInicioM").val(fecha);
+                        fecha = objs.fechafin.split("-");
+                        fecha = fecha[2]+"/"+fecha[1]+"/"+fecha[0];
+                        $(objDMUR + " #txtFechaFinM").val(fecha);
+                        $(objDMUR + " #txtDescripcion").val(objs.descripcion).focus();    
+                        
+                        $("#txtFechaInicioM").datepicker({
+                            defaultDate: "+1w",
+                            minDate: 0,
+                            changeMonth: true,
+                            dateFormat: "dd/mm/yy",
+                            numberOfMonths: 2,
+                            onSelect: function( selectedDate ) {
+                                $( "#txtFechaFinM" ).datepicker( "option", "minDate", selectedDate );
+                            }
+                        });
+                        $("#txtFechaFinM").datepicker({
+                            defaultDate: "+1w",
+                            changeMonth: true,
+                            minDate: 0,
+                            dateFormat: "dd/mm/yy",
+                            numberOfMonths: 2,
+                            onSelect: function( selectedDate ) {
+                                $( "#txtFechaInicioM" ).datepicker( "option", "maxDate", selectedDate );
+                            }
+                        });
+                        js_validarDMUR();
+                    }
+                });
+            },
+            <?php } ?>
+            <?php if(isset($this->perEsp[11])){ ?>
+            'eliminar':function(t){
+                idUsuario = t.id;
+                $(objDEUR).dialog("open");
+            }
+            <?php } ?>
+        }
+    }
+    /******************************************************************************************/
+    $("#selCompaniaUsuarioFiltro").change(function(){
+        $.ajax({
+            url: '/localidad/listar/',
+            type: "POST",
+            data: "selCompaniaUsuario="+$("#selCompaniaUsuarioFiltro").val(),
+            beforeSend:function(){
+                $(".divCargadorPequeno").css("display","inline");
+                $("#selLocalidadUsuarioFiltro").attr("disabled", true);
+            },
+            success: function(data) {
+                var obj = $("#selLocalidadUsuarioFiltro");
+                obj.html("");
+                obj.append('<option value="">Seleccione</option>');
+                $.each(jQuery.parseJSON(data), function(i,row){
+                    obj.append('<option value="'+i+'">'+row+'</option>');
+                });
+                $(".divCargadorPequeno").css("display","none");
+                obj.attr("disabled", false);
+            }
+        }); 
+    });
+    $("#selLocalidadUsuarioFiltro").change(function(){ js_reloadgrilla(); });
+    $("#selTipoUsuario").change(function(){ if($(this).val() == 1){ $("#trRol").css("display","none"); $("#selRolUsuario").val(14); }else $("#trRol").css("display",""); });
+    $("#btnActualizar").button({ icons: { primary: "ui-icon-refresh" } })
+        .click(function(){ $("#jqtblContenido").trigger("reloadGrid"); });
+    $("#selUsuarios, #selActivos").change(function(){
+        $("#jqtblContenido").setGridParam({"url": "/usuario/listar/?idCompania="+$("#selCompaniaUsuarioFiltro").val()+
+                       "&idLocalidad="+$("#selLocalidadUsuarioFiltro").val()+
+                       "&selUsuarios="+$("#selUsuarios").val()+"&selActivos="+$("#selActivos").val() }).trigger("reloadGrid");
+    });
+    function js_reloadgrilla(){
+        $("#jqtblContenido").setGridParam({
+                'url': "/usuario/listar/?idCompania="+$("#selCompaniaUsuarioFiltro").val()+
+                       "&idLocalidad="+$("#selLocalidadUsuarioFiltro").val()+
+                       "&selUsuarios="+$("#selUsuarios").val()+"&selActivos="+$("#selActivos").val()
+            }).trigger("reloadGrid");
+    }
+    $("#jqtblContenido").jqGrid({
+        url: "/usuario/listar/?idCompania="+$("#selCompaniaUsuarioFiltro").val()+
+                       "&idLocalidad="+$("#selLocalidadUsuarioFiltro").val()+
+                       "&selUsuarios="+$("#selUsuarios").val()+"&selActivos="+$("#selActivos").val(),
+        datatype: "json",
+        mtype: "POST",
+        height: 460,
+        width: "auto",
+        shrinkToFit: true,
+        colNames:["idUsuario","idcompania","idlocalidad","Usuario","Nombres","Apellidos","Correo","Rol","¿Activo?"],
+        colModel:[
+                {name:'idUsuario',  index:'idUsuario',  hidden: true },
+                {name:'idcompania', index:'idcompania', hidden: true },
+                {name:'idlocalidad',index:'idlocalidad',hidden: true },
+                {name:'usuario',    index:'usuario',    width:213,  sortable:true, align:'center' },
+                {name:'nombres',    index:'nombres',    width:210,  sortable:true, align:'center' },
+                {name:'apellidos',  index:'apellidos',  width:230,  sortable:true, align:'center' },
+                {name:'correo',     index:'correo',     width:350,  sortable:true, align:'center' },
+                {name:'rol',        index:'rol',        width:150,  sortable:true, align:'center' },
+                {name:'activo',     index:'activo',     width:70,   sortable:true, align:'center' }
+        ],
+        gridComplete: function() {
+            var registros = $("#jqtblContenido").getRowData();
+            var c = 0;
+            var id = "";
+            while(c < registros.length){
+                id = registros[c].idUsuario;
+                $("#"+id).contextMenu("MenuJqGrid",eventsMenu);
+                c++;
+            }
+        },
+        afterInsertRow: function(rowid, aData, rowelem) {
+            if ($("#selUsuarios").val() == 2) $('tr#'+rowid).children("td.sgcollapsed").html("").removeClass('ui-sgcollapsed sgcollapsed');
+        },
+        rowNum:2000,
+        rowTotal: 10000,
+        rowList : [10,20,30,50],
+        rownumbers: true,
+        loadonce: false,
+        ignoreCase: true,
+        gridview: false,
+        pager: "#jqdivPaginado",
+        viewrecords: true,
+        sortname: "variable",
+        sortorder: "asc",
+        subGrid: true,
+	subGridRowExpanded: function(subgrid_id, row_id) {
+            var subgrid_table_id, pager_id;
+            subgrid_table_id = subgrid_id + "_t";
+            pager_id = "p_" + subgrid_table_id;
+            $("#"+subgrid_id).html("<table id='"+subgrid_table_id+"' class='scroll'></table>");
+            $("#"+subgrid_table_id).jqGrid({
+                url: "/usuario/listarsubgrid/?p_idUsuario="+row_id,
+                datatype: "json",
+                mtype: "POST",
+                colNames: ['idUsuario','Usuario','Nombre','Apellidos','Correo','Fecha Inicio','Fecha Fin','Motivo por el cual reemplaza','Activo'],
+                colModel: [
+                        {name:"idusuario",  index:"idusuario",  hidden: true},
+                        {name:"usuario",    index:"usuario",    width:130,   align:"center"},
+                        {name:"nombre",     index:"nombre",     width:130,   align:"center"},
+                        {name:"apellidos",  index:"apellidos",  width:130,   align:"center"},
+                        {name:"correo",     index:"correo",     width:200,   align:"center"},
+                        {name:"fechainicio",index:"fechainicio",width:100,   align:"center"},
+                        {name:"fechafin",   index:"fechafin",   width:100,   align:"center"},
+                        {name:"motivo",     index:"motivo",     width:352,   align:"center"},
+                        {name:"activo",     index:"activo",     width:60,    align:"center"}
+                ],
+                rowNum: 1000,
+                sortname: "num",
+                sortorder: "asc",
+                height: "100%",
+                gridComplete: function() {
+                    var registros = $("#"+subgrid_table_id).getRowData();
+                    var c = 0;
+                    var id = "";
+                    while(c < registros.length){
+                        id = registros[c].idusuario;
+                        $("#"+subgrid_table_id+" #"+id).contextMenu("MenuJqSubGrid",eventsMenuSubGrid);
+                        c++;
+                    }
+                    $("#gbox_jqtblContenido_"+row_id+"_t").css("border", "none");
+                    $("#jqtblContenido_"+row_id).css({"margin-bottom":"3px"});
+                    $("#jqtblContenido_"+row_id+" table.ui-jqgrid-htable th").each(function(){
+                        $(this).css("background", "none").css("background-color", "#FDEDC8");
+                    });
+                    $("#jqtblContenido_"+row_id+" table.ui-pg-table td").each(function(){
+                        $(this).css("background", "none").css("background-color", "#FDEDC8");
+                    });
+                }
+            });
+	}
+    });
+    var idUsuario;
+    var msjCargando = "<div id='divCargadorPrincipal'><img src='/images/loading.gif' /><br>Cargando...</div>";
+    function js_mensajeGeneral(data){
+        var objs = $.parseJSON(data);
+        var divMensaje = $("#divMensajeGeneral");
+        divMensaje.css("display","block");
+        divMensaje.css("padding","7px");
+        divMensaje.css("margin","0px");
+        divMensaje.html("");
+        divMensaje.html(objs.message);
+        setTimeout("js_mensajeGeneralOculta()", 3000);
+    }
+    function js_mensajeGeneralOculta(){
+        var divMensaje = $("#divMensajeGeneral");
+        divMensaje.css("display","none");
+    }
+    
+});
+</script>

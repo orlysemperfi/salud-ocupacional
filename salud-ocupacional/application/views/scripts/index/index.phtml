@@ -1,0 +1,90 @@
+<div id="loginContenedor">
+    <form method="post" name="frmLogin" id="frmLogin">
+        <table id="tblGeneral" width="100%">
+            <tr>
+                <td class="txtDer" width="339">
+                    <img src="/images/logobuenaventura.jpg" />
+                </td>
+                <td width="20"></td>
+                <td class="txtIzq" width="339">
+                    <table id="tblLogin" width="100%">
+                        <tr>
+                            <td class="txtIzq" colspan="2" width="100%">
+                                <h1>Iniciar sesión</h1>
+                                Ingrese sus datos en la parte inferior.<br />
+                                <div class="txtCen" id="divMensaje">&nbsp;</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="txtDer" width="40%"><label for="txtUsuario">Usuario</label></td>
+                            <td class="txtIzq" width="60%">
+                                <input type="text" name="txtUsuario" id="txtUsuario" class="txtInput validate[required, minSize[5]]" maxlength="30" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="txtDer"><label for="txtClave">Contrase&ntilde;a</label></td>
+                            <td class="txtIzq">
+                                <input type="password" name="txtClave" id="txtClave" class="txtInput validate[required]" maxlength="15" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="txtCen" colspan="2">
+                                <button id="btnIngresar" class="btnClase" type="submit">Ingresar</button>
+                                <button id="btnLimpiar" class="btnClase" type="reset">Limpiar</button>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#txtUsuario").focus();
+    $("#btnIngresar").button({icons: {primary: 'ui-icon-check'}, disabled: false});
+    $('#btnIngresar').click(function() {
+        $("#divMensaje").html("");
+        $("#frmLogin").submit(function () {
+            return false;
+        });
+    });
+    $("#btnLimpiar").button({icons: {primary: 'ui-icon-close'}, disabled: false});
+    $('#btnLimpiar').click(function() {
+        $("#txtUsuario").val("").focus();
+    });
+    $("#frmLogin").validationEngine({
+        onValidationComplete: function(form, status){
+            if(status){
+                var divMensaje = $("#divMensaje");
+                divMensaje.html("&nbsp;");
+                $.ajax({
+                    url: "/usuario/iniciarsesion/",
+                    type: "POST",
+                    data: $("#frmLogin").serialize(),
+                    beforeSend:function(){
+                        divMensaje.html("<img src='/images/loading.gif' />");
+                    },
+                    success: function(data) {
+                        var objs = jQuery.parseJSON(data);
+                        if(objs.status == 1){
+                            $(location).attr("href", "/index/panel/");
+                            divMensaje.attr("class", "txtCen correcto-text");
+                            divMensaje.html(objs.message);
+                        }else{
+                            divMensaje.attr("class", "txtCen error-text");
+                            divMensaje.html(objs.message);
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown){
+                        divMensaje.attr("class", "txtCen error-text");
+                        divMensaje.html("Ha ocurrido un error, inténtelo en un momento: " + textStatus + " - " + errorThrown);
+                    }
+                });
+            }
+        },
+	autoHidePrompt: true,
+        autoHideDelay: 4000
+    });
+});
+</script>

@@ -1,0 +1,65 @@
+<?php
+echo $this->doctype();
+$this->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=UTF-8');
+?>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<?php 
+echo $this->headMeta();  
+echo $this->headTitle(); 
+$cadena = $_SERVER['HTTP_USER_AGENT'];
+$buscar = "MSIE";
+$resultado = strpos($cadena, $buscar);
+if($resultado !== FALSE){
+    $buscar = "MSIE 9.0";
+    $buscarb = "Trident/5.0";
+    $resultado = strpos($cadena, $buscar);
+    $resultadob = strpos($cadena, $buscarb);
+    if($resultado === FALSE && $resultadob === FALSE){
+        ?>
+        <div style="margin: 100px auto; color: #AAA; width: 500px; padding: 25px; text-align: center; font-size: 16px; font-family: arial">
+            <img src="/images/logobuenaventura.jpg" />
+            <br /><br />
+            Usted está usando una versión de navegador incompatible con el sistema, le recomendamos  
+            <a href="http://windows.microsoft.com/es-es/internet-explorer/downloads/ie-9/worldwide-languages" title="Internet Explorer 9">
+                actualizar</a> a la versión más reciente o prueba <a href="https://www.google.com/intl/es/chrome/browser/?hl=es" title="Google Chrome!">otro</a>.
+        </div>
+        <?php
+        exit;
+    }
+}
+
+echo $this->HeadScript(); 
+echo $this->HeadLink();
+?>
+</head>
+
+<body>
+
+<table class="tabla100hw" border="0" cellspacing="0" cellpadding="0">
+<tr class="tblCuerpo">
+    <td valign="top">
+        <div id="divContenido">
+            <?php echo $this->layout()->content; ?>
+        </div>
+    </td>
+</tr>
+<tr>
+    <td valign="top" height="10px" class="msjFooter">
+        Desarrollado por <a href="http://www.cyberline.com.pe" style="color:#777; text-decoration: none;" target="_blank">Cyberline SRL</a>
+    </td>
+</tr>
+</table>
+</body>
+<script type="text/javascript">
+$(document).ready(function() {
+    $("html").css("height","100%");
+    var altoHTML = $("html").css("height");
+    $("html").css("height","auto");
+    var obtenerAlto = altoHTML.split("px")
+    var nuevoAltoTablaCuerpo = parseInt(obtenerAlto[0]) - 15;
+    $(".tblCuerpo").css("height", nuevoAltoTablaCuerpo + "px");
+});
+</script>
+</html>

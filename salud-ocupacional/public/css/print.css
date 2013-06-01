@@ -1,0 +1,81 @@
+div, table, td, span, a, label, input, select, textarea{
+	font-family: arial;
+	font-size: 10px;
+}
+div{
+/*	float: none;*/
+}
+table{
+	width: 100%;
+}
+.tblFacturas{
+	margin-bottom: 15px;
+}
+table, td, td{
+	border: 1px solid #000;
+	border-collapse: collapse;
+}
+table thead{
+	font-weight: bold;
+	text-align: center;
+}
+tr, td{
+	height: 20px;
+}
+input, select, option, textarea{
+	border: none;
+	width: 100%;
+	color: #000;
+}
+button, input[type="checkbox"], img{
+	display: none;
+}
+select{
+	font-size: 9px;
+}
+a{
+	color: #000;
+	text-decoration:none;
+}
+div[id*="dialog"]{
+	display:none;
+}
+.tblDatosEspecificosCabecera {
+	text-align: center;
+}
+.txtCen{
+	text-align: center;
+}
+.txtIzq{
+	text-align: left;
+}
+.txtDer{
+	text-align: right;
+}
+.toolbar, .tblMenu,  .tblPie, .oculto{
+	display:none;
+}
+#divPP{
+	display: none !Important;
+	position: absolute;
+	bottom: 0px;
+	border-top: 1px solid #000;
+	padding-top: 5px;
+	margin-top: 10px;
+	width: 100%;
+	background: #FFF;
+}
+.tabla100hw, .tblCuerpo td:first-child, #divContenido{
+	border:none;
+}
+#divContenido td{
+	border: solid 1px #000;
+}
+#divCabeceraPrint{
+	border-bottom: 1px solid #000;
+	height: 100px;
+	display: inherit !important;
+}
+#divCabeceraPrint img{
+	display: inline !Important;
+}

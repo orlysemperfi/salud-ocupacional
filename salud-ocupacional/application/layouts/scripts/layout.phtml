@@ -1,0 +1,132 @@
+<?php
+$auth = Zend_Auth::getInstance();
+if ($auth->hasIdentity()) {
+    $infoUsuario = $auth->getIdentity();
+}
+echo $this->doctype();
+$this->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=UTF-8');
+?>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<?php
+echo $this->headMeta();
+echo $this->headTitle();
+$cadena = $_SERVER['HTTP_USER_AGENT'];
+$buscar = "MSIE";
+$resultado = strpos($cadena, $buscar);
+if($resultado !== FALSE){
+    $buscar = "MSIE 9.0";
+    $buscarb = "Trident/5.0";
+    $resultado = strpos($cadena, $buscar);
+    $resultadob = strpos($cadena, $buscarb);
+    if($resultado === FALSE && $resultadob === FALSE){
+        ?>
+        <div style="margin: 100px auto; color: #AAA; width: 500px; padding: 25px; text-align: center; font-size: 16px; font-family: arial">
+            <img src="/images/logobuenaventura.jpg" />
+            <br /><br />
+            Usted está usando una versión de navegador incompatible con el sistema, le recomendamos  
+            <a href="http://windows.microsoft.com/es-es/internet-explorer/downloads/ie-9/worldwide-languages" title="Internet Explorer 9">
+                actualizar</a> a la versión más reciente o prueba <a href="https://www.google.com/intl/es/chrome/browser/?hl=es" title="Google Chrome!">otro</a>.
+        </div>
+        <?php
+        exit;
+    }
+}
+
+echo $this->HeadScript();
+echo $this->HeadLink(); 
+?>
+<link rel="stylesheet" href="/css/print.css" type="text/css" media="print" />
+<!--[if lte IE 7]>
+<style>
+html, body{ height: auto; 
+h3 { margin: 0px; padding: 0px; padding-top: 10px; font-size: 13px; }
+form{ margin: 0px; padding: 0px; 
+.toolbar{ width: auto; 
+</style>
+<![endif]-->
+<!--[if IE 8]>
+<style>
+html, body{ height: auto; }
+form{ margin: 0px; padding: 0px; 
+.toolbar{ }
+</style>
+<![endif]-->
+</head>
+<body>
+<!-- INICIO SECCIÓN DE IMPRESIÓN -->
+<div id="divCabeceraPrint" style="display:none; border-bottom: 1px solid #000; margin-bottom: 20px; padding-bottom: 20px; width: 100%; height:60px">
+<div style="float:left; width:50%; text-align:left"><img src="/images/logobuenaventura.jpg" /></div>
+<div style="float:right; width:50%; text-align:right; padding-top:10px;"><br /><br /><br /><br />
+<?php 
+$mes = date("n"); 
+$mesArray = array( 1 => "Enero", 2 => "Febrero", 3 => "Marzo", 4 => "Abril", 5 => "Mayo", 6 => "Junio", 
+                   7 => "Julio", 8 => "Agosto", 9 => "Septiembre", 10 => "Octubre", 11 => "Noviembre", 
+                   12 => "Diciembre" ); $semana = date("D"); 
+$semanaArray = array( "Mon" => "Lunes", "Tue" => "Martes", "Wed" => "Miercoles", "Thu" => "Jueves", 
+                      "Fri" => "Viernes", "Sat" => "Sábado", "Sun" => "Domingo", ); 
+$mesReturn = $mesArray[$mes]; 
+$semanaReturn = $semanaArray[$semana]; 
+$dia = date("d"); $año = date ("Y"); 
+echo $semanaReturn.", ".$dia." de ".$mesReturn." de ".$año; 
+?></div>
+</div>
+<!-- FIN SECCIÓN DE IMPRESIÓN -->
+<div class="cargador oculto"><img src="/images/loading.gif" id="imgLoading" /><br>Cargando...</div>
+<div class="ui-widget-overlay oculto" style="z-index: 1001; width: 100%; height: 100%; "></div>
+<table class="tabla100hw" border="0" cellspacing="0" cellpadding="0">
+<tr class="tblMenu">
+    <td valign="top">
+        <div class="toolbar">
+            <div style="float: left; z-index: 100;">
+                <p class="toolbar-logo">Salud Ocupacional</p>
+                <p class="lineaVertical">&nbsp;</p>
+                <ul class="menu">
+                    <?php if(isset($this->perEsp[1])){ ?><li><a href="/usuario/" id="usuario">Usuarios</a></li><?php } ?>
+                    <?php if(isset($this->perEsp[12])){ ?><li><a href="/empleado/" id="empleado">Empleados</a></li><?php } ?>
+                    <?php if(isset($this->perEsp[25])){ ?><li><a href="/cronograma/" id="cronograma">Cronograma de citas</a></li><?php } ?>
+                    <?php if(isset($this->perEsp[31])){ ?><li><a href="/evaluacion/" id="evaluacion">Evaluaciones</a></li><?php } ?>
+                    <?php if(isset($this->perEsp[44])){ ?><li><a href="/reporte/" id="reporte">Reportes</a></li><?php } ?>
+                    <?php if(isset($this->perEsp[45])){ ?>
+                    <li>
+                        <a href="#" id="maestro">Maestros</a>
+                        <ul class="submenu" style="display: none">
+                            <li>
+                                <a href="/maestro/modulo/" id="maestro">Roles y Módulos</a>
+                                <a href="/maestro/visual/" id="maestro">Pantalla de Visualización</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <?php } ?>
+                </ul>
+            </div>
+            <div style="float: right; z-index: 0">
+                <div class="toolbar-item" style="position: fixed; top: 0px; right: 0px;">
+                    <a onmouseover="js_mostrar(1)" onmouseout="js_mostrar(0)" class="menus"><img src="/images/usucon.png" id="estadousu" align="bottom" />&nbsp;&nbsp;BIENVENIDO(A) <?php echo $infoUsuario->apellidos . ", " . $infoUsuario->nombres; ?></a>
+                </div>
+            </div>
+            <div id="divSalir" style="
+                 position: fixed; top: 29px; right: 0px; background-color: #2E7667; border: solid 1px #2E6156;
+                 width: 100px; height: 30px; display: none; padding-left: 10px; padding-top: 5px;" onmouseover="js_mostrar(1)" onmouseout="js_mostrar(0)">
+                <a href="/usuario/cerrarsesion/" onmouseout="js_mostrar(0)">&raquo;&nbsp;&nbsp;&nbsp;&nbsp; Salir</a><br />
+                <a href="#" id="cambiarestado" onmouseout="js_mostrar(0)">&raquo;&nbsp;&nbsp;&nbsp;&nbsp; Cambiar estado</a>
+            </div>
+        </div>
+    </td>
+</tr>
+<tr class="tblCuerpo">
+    <td valign="top">
+        <div id="divContenido">
+            <?php echo $this->layout()->content; ?>
+        </div>
+    </td>
+</tr>
+<tr class="tblPie">
+    <td valign="top" class="msjFooter">
+	Desarrollado por <a href="http://www.cyberline.com.pe/" style="text-decoration:none; color:#777" target="_blank">Cyberline SRL</a>
+    </td>
+</tr>
+</table>
+</body>
+</html>

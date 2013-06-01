@@ -1,0 +1,1891 @@
+<style type="text/css">
+    @media print {
+        img{ width: 30% }
+        div{ color: #000; }
+        #divBarraHerramientas,#divGrilla,#divBarraTitulo,#MenuJqGrid,#dialogCita,#dialogImprimir,
+        #jqtblContenidoCita, #jqdivPaginadoCita, .ui-jqgrid, .divDialogTitulo,
+        #divAudiogramaOpciones, .ui-dialog-buttonpane, .ui-dialog-titlebar{ display:none; }
+        #dialogAudiometria{ margin-top: -1100px !important; }
+    }
+</style>
+<link class="include" rel="stylesheet" type="text/css" href="/css/jquery.jqplot.min.css" />
+<!--[if IE]>
+<script language="javascript" type="text/javascript" src="/js/excanvas.js"></script>
+<![endif]-->
+<script class="include" type="text/javascript" src="/js/jquery.jqplot.min.js"></script>
+<script language="javascript" type="text/javascript" src="/js/jqplot.canvasOverlay.min.js"></script>
+<script language="javascript" type="text/javascript" src="/js/jqplot.canvasTextRenderer.js"></script>
+<script language="javascript" type="text/javascript" src="/js/jqplot.canvasAxisLabelRenderer.js"></script>
+<div id="divBarraTitulo">
+    Módulo de Empleados
+</div>
+<div id="divBarraHerramientas">
+    <div class="divIzquierda" style="width: 70%">
+        <select id="selCompaniaUsuarioFiltro" name="selCompaniaUsuarioFiltro">
+            <?php 
+            foreach($this->rstListarCompania as $row){
+                if($row["idCompania"] == $this->idCompania){
+                    echo '<option value="'.$row["idCompania"].'">'.$row["nombre"].'</option>';
+                    break;
+                }
+            }
+            foreach($this->rstListarCompania as $row){
+                if($row["idCompania"] != $this->idCompania){
+                    echo '<option value="'.$row["idCompania"].'">'.$row["nombre"].'</option>';
+                }
+            }
+            ?>
+        </select>
+        <select id="selLocalidadUsuarioFiltro" name="selLocalidadUsuarioFiltro">
+            <?php
+            foreach($this->rstListarLocalidad as $row){
+                if($row["idLocalidad"] == $this->idLocalidad){
+                    echo '<option value="'.$row["idLocalidad"].'">'.$row["nombre"].'</option>';
+                    break;
+                }
+            }
+            foreach($this->rstListarLocalidad as $row){
+                if($row["idLocalidad"] != $this->idLocalidad){
+                    echo '<option value="'.$row["idLocalidad"].'">'.$row["nombre"].'</option>';
+                }
+            }
+            ?>
+        </select>
+        <div class="divCargadorPequeno" style="display:none"> <img src="/images/cargando.gif" /></div>
+         | 
+        <input type="text" id="txtDNIFiltro" name="txtDNIFiltro" placeholder="Ingrese DNI"  />
+        O
+        <input type="text" id="txtNombresFiltro" name="txtNombresFiltro" placeholder="Ingrese apellidos" style="width:140px !important" />
+         | 
+        <?php if(isset($this->perEsp[13])){ ?><button name="btnNuevo" id="btnNuevo">Nuevo empleado / nueva cita</button><?php } ?>
+        <button name="btnActualizar" id="btnActualizar">Actualizar</button>
+    </div>
+    <div class="divDerecha" style="width: 30%">
+        <div id="divMensajeGeneral" class="divDialogTitulo ui-state-highlight ui-corner-all oculto">
+        </div>
+    </div>
+</div>
+<div id="divGrilla">
+    <table id="jqtblContenido"></table>
+    <div id="jqdivPaginado"></div>
+</div>
+<?php if(isset($this->perEsp[14]) || isset($this->perEsp[22]) || isset($this->perEsp[23]) || isset($this->perEsp[24])){ ?>
+<div class="contextMenu" id="MenuJqGrid">
+    <ul>
+        <?php if(isset($this->perEsp[14])){ ?><li id="cita">Ver citas/atenciones</li><?php } ?>
+        <?php if(isset($this->perEsp[22])){ ?><li id="nuevacita">Nueva cita</li><?php } ?>
+        <?php if((isset($this->perEsp[14]) || isset($this->perEsp[22])) && (isset($this->perEsp[23]) || isset($this->perEsp[24]))){ ?><li id="mh1" class="divLineaContextmenu"></li><?php } ?>
+        <?php if(isset($this->perEsp[23])){ ?><li id="modificar">Modificar empleado</li><?php } ?>
+        <?php if(isset($this->perEsp[24])){ ?><li id="eliminar">Eliminar empleado</li><?php } ?>
+    </ul>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[14])){ ?>
+<div class="contextMenu" id="MenuJqGridCita">
+    <ul>
+        <?php if(isset($this->perEsp[15])){ ?><li id="iniciarcita">Iniciar Cita</li><?php } ?>
+        <?php if(isset($this->perEsp[16])){ ?><li id="cancelarcita">Cancelar Cita</li><?php } ?>
+        <?php if(isset($this->perEsp[15]) || isset($this->perEsp[16])){ ?><li id="mh2" class="divLineaContextmenu"></li><?php } ?>
+        <?php if(isset($this->perEsp[19])){ ?><li id="imprimircita">Imprimir documento inicial</li><?php } ?>
+        <?php if(isset($this->perEsp[20])){ ?><li id="imprimirexamen">Imprimir examenes</li><?php } ?>
+        <?php if(isset($this->perEsp[20])){ ?><li id="imprimiraudiometria">Imprimir audiometría</li><?php } ?>
+        <?php if(isset($this->perEsp[21])){ ?><li id="subirarchivos">Subir archivos</li><?php } ?>
+        <?php if(isset($this->perEsp[17])){ ?><li id="modificarcita">Modificar cita</li><?php } ?>
+        <?php if(isset($this->perEsp[18])){ ?><li id="eliminarcita">Eliminar cita</li><?php } ?>
+    </ul>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[13])){ ?>
+<div id="dialogNuevoUsuario" title="Nuevo empleado / cita" class="dialogForms" style="overflow: hidden"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Ingrese la información requerida, los campos con (*) son obligatorios
+    </div>
+    <div id="divDialogContenido">
+        <form action="" method="post" id="frmNuevoUsuario" name="frmNuevoUsuario">
+            <input type="hidden" id="hdnIdCompania" name="hdnIdCompania" />
+            <input type="hidden" id="hdnIdLocalidad" name="hdnIdLocalidad" />
+            <div style="float: left; width: 350px; height: 370px; border: solid 1px #E4E4E4; padding-bottom: 15px">
+                <table id="tblNuevoUsuario" style="width:340px">
+                    <tr>
+                        <td class="txtCen" colspan="3" height="40">
+                            <strong>DATOS DEL EMPLEADO</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="txtDer">Apellido Paterno</td>
+                        <td width="10"></td>
+                        <td width="200" class="txtIzq"><input type="text" id="txtApellidoPaterno" name="txtApellidoPaterno" maxlength="50" class="validate[required, minSize[3],custom[onlyLetterSp]]" /> *</td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer">Apellido Materno</td>
+                        <td></td>
+                        <td class="txtIzq"><input type="text" id="txtApellidoMaterno" name="txtApellidoMaterno" maxlength="50" class="validate[required, minSize[3],custom[onlyLetterSp]]" /> *</td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer">Nombres</td>
+                        <td></td>
+                        <td class="txtIzq"><input type="text" id="txtNombres" name="txtNombres" maxlength="50" class="validate[required, minSize[3],custom[onlyLetterSp]]" /> *</td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer">DNI</td>
+                        <td></td>
+                        <td class="txtIzq"><input type="text" id="txtDNI" name="txtDNI" maxlength="8" class="validate[required, minSize[8],custom[integer]]" /> *</td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer">Fecha de Nacimiento</td>
+                        <td></td>
+                        <td class="txtIzq"><input type="text" id="txtFechaNacimiento" name="txtFechaNacimiento" readonly="readonly" class="validate[required] datepicker" /> *</td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer">Departamento</td>
+                        <td></td>
+                        <td class="txtIzq">
+                            <select id="selDepartamento" name="selDepartamento" class="validate[required]">
+                                <option value="">Seleccione</option>
+                                <?php
+                                foreach($this->rstListarDepartamento as $row){
+                                    echo '<option value="'.$row["id_dpto"].'">'.$row["descr_dpto"].'</option>';
+                                }
+                                ?>
+                            </select> *
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer">Provincia</td>
+                        <td></td>
+                        <td class="txtIzq">
+                            <select id="selProvincia" name="selProvincia" class="validate[required]">
+                                <option value="">Seleccione</option>
+                            </select> *
+                            <div class="divCargadorProvincia" style="display:none"> <img src="/images/cargando.gif" /></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer">Distrito</td>
+                        <td></td>
+                        <td class="txtIzq">
+                            <select id="selDistrito" name="selDistrito" class="validate[required]">
+                                <option value="">Seleccione</option>
+                            </select> *
+                            <div class="divCargadorDistrito" style="display:none"> <img src="/images/cargando.gif" /></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer">Sexo</td>
+                        <td></td>
+                        <td class="txtIzq">
+                            <input class="validate[required]" type="radio" name="rdSexo" id="rdSexo" value="M"> Masculino
+                            <input class="validate[required]" type="radio" name="rdSexo" id="rdSexo" value="F"> Femenino  *
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer">Fecha de Ingreso laboral</td>
+                        <td></td>
+                        <td class="txtIzq"><input type="text" id="txtFechaIngreso" name="txtFechaIngreso" readonly="readonly" class="validate[required] datepicker" /> *</td>
+                    </tr>
+                </table>
+            </div>
+            <div style="float: right; width: 330px; height: 370px; border: solid 1px #E4E4E4; padding-bottom: 15px">
+                <table id="tblNuevoCita" style="width:330px">
+                    <tr>
+                        <td class="txtCen" colspan="3" height="40"><strong>DATOS DE LA CITA</strong></td>
+                    </tr>
+                    <tr>
+                        <td width="140" class="txtDer">Motivo</td>
+                        <td width="10"></td>
+                        <td width="170" class="txtIzq">
+                            <select id="selMotivo" name="selMotivo" class="validate[required]">
+                                <option value="">SELECCIONE MOTIVO</option>
+                                <option value="1">ANUAL</option>
+                                <option value="2">EQUIPOS PESADOS</option>
+                                <option value="3">TRABAJO EN ALTURA</option>
+                                <option value="4">RETIRO</option>
+                                <option value="5">INGRESO</option>
+                                <option value="6">RETORNO DE VACACIONES</option>
+                                <option value="7">VISITANTE</option>
+                            </select> *
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer">Fecha de Cita</td>
+                        <td></td>
+                        <td class="txtIzq"><input type="text" id="txtFechaCita" name="txtFechaCita" readonly="readonly" class="validate[required] datepicker" /> *</td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer">Puesto</td>
+                        <td></td>
+                        <td class="txtIzq"><input type="text" id="txtPuesto" name="txtPuesto" maxlength="50" class="validate[minSize[3]]" /></td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer">Teléfono</td>
+                        <td></td>
+                        <td class="txtIzq"><input type="text" id="txtTelefono" name="txtTelefono" maxlength="50" class="validate[minSize[7]]" /></td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer">Grado de instrucción</td>
+                        <td></td>
+                        <td class="txtIzq"><input type="text" id="txtGradoInstruccion" name="txtGradoInstruccion" maxlength="50" class="validate[minSize[3]]" /></td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer">Estado Civil</td>
+                        <td></td>
+                        <td class="txtIzq">
+                            <select id="selEstadoCivil" name="selEstadoCivil">
+                                <option value="">SELECCIONE</option>
+                                <option value="CS">CASADO</option>
+                                <option value="SL">SOLTERO</option>
+                                <option value="VD">VIUDO</option>
+                                <option value="CV">CONVIVIENTE</option>
+                                <option value="DV">DIVORCIADO</option>
+                                <option value="SP">SEPARADO</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer">Tipo de Trabajador</td>
+                        <td></td>
+                        <td class="txtIzq">
+                            <select id="txtTipotrabajador" name="txtTipotrabajador" class="validate[required]">
+                                <option value="">SELECCIONE</option>
+                                <option value="OBR">OBRERO</option>
+                                <option value="MAG">MAGISTERIO</option>
+                                <option value="GTE">GERENTE</option>
+                                <option value="PRA">PRACTICANTE</option>
+                                <option value="EMP">EMPLEADO</option>
+                                <option value="EJC">EJECUTIVO</option>
+                                <option value="EMI">EMPLEADO DE MINA</option>
+                                <option value="EMC">EMPLEADO DE CONTRATA</option>
+                                <option value="OBC">OBRERO DE CONTRATA</option>
+                            </select> *</td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer">Área</td>
+                        <td></td>
+                        <td class="txtIzq">
+                            <input type="hidden" id="hdnArea" name="hdnArea" maxlength="20" class="" />
+                            <input type="text" id="txtArea" name="txtArea" maxlength="100" class="validate[required, minSize[3]]" /> *</td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer">Centro de costo</td>
+                        <td></td>
+                        <td class="txtIzq">
+                            <input type="hidden" id="hdnCentrocosto" name="hdnCentrocosto" maxlength="20" class="" />
+                            <input type="text" id="txtCentrocosto" name="txtCentrocosto" maxlength="100" class="validate[required,minSize[3]]" /> *</td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer">Empresa</td>
+                        <td></td>
+                        <td class="txtIzq">
+                            <input type="hidden" id="hdnRUC" name="hdnRUC" maxlength="11" class="" />
+                            <input type="text" id="txtRUC" name="txtRUC" maxlength="100" class="validate[required, minSize[3]]" /> *</td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer">¿Es empresa especializada?</td>
+                        <td></td>
+                        <td class="txtIzq">
+                            <input type="checkbox" id="chkFlgTipoEmp" name="chkFlgTipoEmp" style="width: auto" /></td>
+                    </tr>
+                    <tr>
+                        <td class="txtDer" colspan="3">
+                            <div class="txtCen" id="divMensaje"></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </form>
+    </div>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[23])){ ?>
+<div id="dialogModificarUsuario" title="Modificar Empleado" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Ingrese la información requerida:
+    </div>
+    <div id="divDialogContenido">
+        <form action="" method="post" id="frmModificarUsuario" name="frmModificarUsuario">
+            <table id="tblModificarUsuario" style="width:349px">
+                <tr>
+                    <td width="349" class="txtCen" colspan="3">
+                        <div class="txtCen" id="divMensaje">&nbsp;</div>
+                        <input type="hidden" id="hdnIdEmpleado" name="hdnIdEmpleado" />
+                        <input type="hidden" id="hdnOpcion" name="hdnOpcion" value="2" />
+                    </td>
+                </tr>
+                <tr>
+                    <td width="150" class="txtDer">Apellido Paterno</td>
+                    <td width="10"></td>
+                    <td width="200" class="txtIzq"><input type="text" id="txtApellidoPaterno2" name="txtApellidoPaterno2" maxlength="50" class="validate[required, minSize[3],custom[onlyLetterSp]]" /> *</td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Apellido Materno</td>
+                    <td></td>
+                    <td class="txtIzq"><input type="text" id="txtApellidoMaterno2" name="txtApellidoMaterno2" maxlength="50" class="validate[required, minSize[3],custom[onlyLetterSp]]" /> *</td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Nombres</td>
+                    <td></td>
+                    <td class="txtIzq"><input type="text" id="txtNombres2" name="txtNombres2" maxlength="50" class="validate[required, minSize[3],custom[onlyLetterSp]]" /> *</td>
+                </tr>
+                <tr>
+                    <td class="txtDer">DNI</td>
+                    <td></td>
+                    <td class="txtIzq"><input type="text" id="txtDNI2" name="txtDNI2" maxlength="8" class="validate[required, minSize[8],custom[integer]]" /> *</td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Fecha de Nacimiento</td>
+                    <td></td>
+                    <td class="txtIzq"><input type="text" id="txtFechaNacimiento2" name="txtFechaNacimiento2" readonly="readonly" class="validate[required] datepicker" /> *</td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Departamento</td>
+                    <td></td>
+                    <td class="txtIzq">
+                        <select id="selDepartamento2" name="selDepartamento2" class="validate[required]">
+                            <option value="">Seleccione</option>
+                            <?php
+                            foreach($this->rstListarDepartamento as $row){
+                                echo '<option value="'.$row["id_dpto"].'">'.$row["descr_dpto"].'</option>';
+                            }
+                            ?>
+                        </select> *
+                    </td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Provincia</td>
+                    <td></td>
+                    <td class="txtIzq">
+                        <select id="selProvincia2" name="selProvincia2" class="validate[required]">
+                            <option value="">Seleccione</option>
+                        </select> *
+                        <div class="divCargadorProvincia2" style="display:none"> <img src="/images/cargando.gif" /></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Distrito</td>
+                    <td></td>
+                    <td class="txtIzq">
+                        <select id="selDistrito2" name="selDistrito2" class="validate[required]">
+                            <option value="">Seleccione</option>
+                        </select> *
+                        <div class="divCargadorDistrito2" style="display:none"> <img src="/images/cargando.gif" /></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Sexo</td>
+                    <td></td>
+                    <td class="txtIzq">
+                        <input class="validate[required]" type="radio" name="rdSexo2" id="rdSexo2" value="M"> Masculino
+                        <input class="validate[required]" type="radio" name="rdSexo2" id="rdSexo2" value="F"> Femenino  *
+                    </td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Fecha de Ingreso laboral</td>
+                    <td></td>
+                    <td class="txtIzq"><input type="text" id="txtFechaIngreso2" name="txtFechaIngreso2" readonly="readonly" class="validate[required] datepicker" /> *</td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[17])){ ?>
+<div id="dialogModificarCita" title="Modificar Cita" class="dialogForms" style="overflow: hidden"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Ingrese la información requerida:
+    </div>
+    <div id="divDialogContenido">
+        <form action="" method="post" id="frmModificarCita" name="frmModificarCita">
+            <table id="tblModificarCita" style="width:349px">
+                <tr>
+                    <td width="349" class="txtCen" colspan="3">
+                        <div class="txtCen" id="divMensajeCita">&nbsp;</div>
+                        <input type="hidden" id="hdnIdCita" name="hdnIdCita" />
+                        <input type="hidden" id="hdnOpcion" name="hdnOpcion" value="2" />
+                        <input type="hidden" id="hdnMotivo" name="hdnMotivo" />
+                    </td>
+                </tr>
+                <tr>
+                    <td width="130" class="txtDer">Motivo</td>
+                    <td width="10"></td>
+                    <td width="180" class="txtIzq">
+                        <select id="selMotivo2" name="selMotivo2" class="validate[required]">
+                            <option value="1">ANUAL</option>
+                            <option value="2">EQUIPOS PESADOS</option>
+                            <option value="3">TRABAJO EN ALTURA</option>
+                            <option value="4">RETIRO</option>
+                            <option value="5">INGRESO</option>
+                            <option value="6">RETORNO DE VACACIONES</option>
+                            <option value="7">VISITANTE</option>
+                        </select> *
+                    </td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Fecha de Cita</td>
+                    <td></td>
+                    <td class="txtIzq"><input type="text" id="txtFechaCita2" name="txtFechaCita2" readonly="readonly" class="validate[required] datepicker" /> *</td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Puesto</td>
+                    <td></td>
+                    <td class="txtIzq"><input type="text" id="txtPuesto2" name="txtPuesto2" maxlength="50" class="validate[minSize[3],custom[onlyLetterSp]]" /></td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Teléfono</td>
+                    <td></td>
+                    <td class="txtIzq"><input type="text" id="txtTelefono2" name="txtTelefono2" maxlength="50" class="validate[minSize[3]]" /></td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Grado de instrucción</td>
+                    <td></td>
+                    <td class="txtIzq"><input type="text" id="txtGradoInstruccion2" name="txtGradoInstruccion2" maxlength="50" class="validate[minSize[3]]" /></td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Estado Civil</td>
+                    <td></td>
+                    <td class="txtIzq">
+                        <select id="selEstadoCivil2" name="selEstadoCivil2">
+                            <option value="CS">CASADO</option>
+                            <option value="SL">SOLTERO</option>
+                            <option value="VD">VIUDO</option>
+                            <option value="CV">CONVIVIENTE</option>
+                            <option value="DV">DIVORCIADO</option>
+                            <option value="SP">SEPARADO</option>
+                        </select>
+                    </td>
+                </tr>      
+                <tr>
+                    <td class="txtDer">Tipo de Trabajador</td>
+                    <td></td>
+                    <td class="txtIzq">
+                        <select id="txtTipotrabajador2" name="txtTipotrabajador2" class="validate[required]">
+                            <option value="">SELECCIONE</option>
+                            <option value="OBR">OBRERO</option>
+                            <option value="MAG">MAGISTERIO</option>
+                            <option value="GTE">GERENTE</option>
+                            <option value="PRA">PRACTICANTE</option>
+                            <option value="EMP">EMPLEADO</option>
+                            <option value="EJC">EJECUTIVO</option>
+                            <option value="EMI">EMPLEADO DE MINA</option>
+                            <option value="EMC">EMPLEADO DE CONTRATA</option>
+                            <option value="OBC">OBRERO DE CONTRATA</option>
+                        </select> *</td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Área</td>
+                    <td></td>
+                    <td class="txtIzq">
+                        <input type="hidden" id="hdnArea2" name="hdnArea2" maxlength="20" class="" />
+                        <input type="text" id="txtArea2" name="txtArea2" maxlength="100" class="validate[required, minSize[3]]" /> *</td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Centro de costo</td>
+                    <td></td>
+                    <td class="txtIzq">
+                        <input type="hidden" id="hdnCentrocosto2" name="hdnCentrocosto2" maxlength="20" class="" />
+                        <input type="text" id="txtCentrocosto2" name="txtCentrocosto2" maxlength="100" class="validate[required,minSize[3]]" /> *</td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Empresa</td>
+                    <td></td>
+                    <td class="txtIzq">
+                        <input type="hidden" id="hdnRUC2" name="hdnRUC2" maxlength="11" class="" />
+                        <input type="text" id="txtRUC2" name="txtRUC2" maxlength="100" class="validate[required, minSize[3]]" /> *</td>
+                </tr>
+                <tr>
+                    <td class="txtDer">¿Es empresa especializada?</td>
+                    <td></td>
+                    <td class="txtIzq">
+                        <input type="checkbox" id="chkFlgTipoEmp2" name="chkFlgTipoEmp2" style="width: auto" /></td>
+                </tr>
+                <tr>
+                    <td class="txtDer" colspan="3">
+                        <div class="txtCen" id="divMensaje"></div>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[24])){ ?>
+<div id="dialogEliminarUsuario" title="Eliminar Empleado" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        ¿Está seguro de eliminar este registro?
+    </div>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[18])){ ?>
+<div id="dialogEliminarCita" title="Eliminar Cita" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        ¿Está seguro de eliminar este registro?
+    </div>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[16])){ ?>
+<div id="dialogCancelarCita" title="Cancelar Cita" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        ¿Está seguro de cancelar la cita?
+    </div>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[15])){ ?>
+<div id="dialogDeclaracionJuradaPreguntar" title="Mensaje" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        ¿Pasó sus vacaciones por debajo de una altitud 2500 msnm, durante tres semanas contínuas?
+    </div>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[14])){ ?>
+<div id="dialogCita" title="Citas y atenciones" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Modifique la información que crea necesaria.
+    </div>
+    <div id="divDialogContenido">
+        <table id="jqtblContenidoCita"></table>
+        <div id="jqdivPaginadoCita"></div>
+    </div>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[21])){ ?>
+<div id="dialogSubirArchivos" title="Subir Archivos" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Ingrese la información requerida:
+    </div>
+    <div id="divDialogContenido">
+        <form action="" method="post" id="frmSubirArchivos" name="frmSubirArchivos" enctype="multipart/form-data">
+            <table id="tblSubirArchivos" style="width:349px">
+                <tr>
+                    <td width="349" class="txtCen" colspan="3">
+                        <input type="hidden" id="hdnIdCita" name="hdnIdCita" />
+                        <input type="hidden" id="hdnIdMotivo" name="hdnIdMotivo" />
+                    </td>
+                </tr>
+                <tr id="tr1">
+                    <td width="150" class="txtDer">Fichas</td><td width="10"></td>
+                    <td width="200" class="txtIzq"><input type="file" id="file1" name="file1" /><span id="sf1"></span></td>
+                </tr>
+                <tr id="tr2">
+                    <td width="150" class="txtDer">Audiometría</td><td width="10"></td>
+                    <td width="200" class="txtIzq"><input type="file" id="file2" name="file2" /><span id="sf2"></span></td>
+                </tr>
+                <tr id="tr3">
+                    <td width="150" class="txtDer">Espirometria</td><td width="10"></td>
+                    <td width="200" class="txtIzq"><input type="file" id="file3" name="file3" /><span id="sf3"></span></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[22])){ ?>
+<div id="dialogNuevaCita" title="Nueva Cita" class="dialogForms" style="overflow: hidden"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Ingrese la información requerida:
+    </div>
+    <div id="divDialogContenido">
+        <form action="" method="post" id="frmNuevaCita" name="frmNuevaCita">
+            <input type="hidden" id="hdnIdCompaniaNC" name="hdnIdCompaniaNC" />
+            <input type="hidden" id="hdnIdLocalidadNC" name="hdnIdLocalidadNC" />
+            <input type="hidden" id="hdnIdEmpleadoNC" name="hdnIdEmpleadoNC" />
+            <table id="tblNuevoCita" style="width:320px">
+                <tr>
+                    <td class="txtCen" colspan="3" height="20">
+                        <div class="txtCen" id="divMensajeNC">&nbsp;</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="140" class="txtDer">Motivo</td>
+                    <td width="10"></td>
+                    <td width="170" class="txtIzq">
+                        <select id="selMotivoNC" name="selMotivoNC" class="validate[required]">
+                            <option value="">SELECCIONE MOTIVO</option>
+                            <option value="1">ANUAL</option>
+                            <option value="2">EQUIPOS PESADOS</option>
+                            <option value="3">TRABAJO EN ALTURA</option>
+                            <option value="4">RETIRO</option>
+                            <option value="5">INGRESO</option>
+                            <option value="6">RETORNO DE VACACIONES</option>
+                            <option value="7">VISITANTE</option>
+                        </select> *
+                    </td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Fecha de Cita</td>
+                    <td></td>
+                    <td class="txtIzq"><input type="text" id="txtFechaCitaNC" name="txtFechaCitaNC" readonly="readonly" class="validate[required] datepicker" /> *</td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Puesto</td>
+                    <td></td>
+                    <td class="txtIzq"><input type="text" id="txtPuestoNC" name="txtPuestoNC" maxlength="50" class="validate[minSize[3],custom[onlyLetterSp]]" /></td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Teléfono</td>
+                    <td></td>
+                    <td class="txtIzq"><input type="text" id="txtTelefonoNC" name="txtTelefonoNC" maxlength="50" class="validate[minSize[3]]" /></td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Grado de instrucción</td>
+                    <td></td>
+                    <td class="txtIzq"><input type="text" id="txtGradoInstruccionNC" name="txtGradoInstruccionNC" maxlength="50" class="validate[minSize[3]]" /></td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Estado Civil</td>
+                    <td></td>
+                    <td class="txtIzq">
+                        <select id="selEstadoCivilNC" name="selEstadoCivilNC">
+                            <option value="">SELECCIONE</option>
+                            <option value="CS">CASADO</option>
+                            <option value="SL">SOLTERO</option>
+                            <option value="VD">VIUDO</option>
+                            <option value="CV">CONVIVIENTE</option>
+                            <option value="DV">DIVORCIADO</option>
+                            <option value="SP">SEPARADO</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Tipo de Trabajador</td>
+                    <td></td>
+                    <td class="txtIzq">
+                        <select id="txtTipotrabajadorNC" name="txtTipotrabajadorNC" class="validate[required]">
+                            <option value="">SELECCIONE</option>
+                            <option value="OBR">OBRERO</option>
+                            <option value="MAG">MAGISTERIO</option>
+                            <option value="GTE">GERENTE</option>
+                            <option value="PRA">PRACTICANTE</option>
+                            <option value="EMP">EMPLEADO</option>
+                            <option value="EJC">EJECUTIVO</option>
+                            <option value="EMI">EMPLEADO DE MINA</option>
+                            <option value="EMC">EMPLEADO DE CONTRATA</option>
+                            <option value="OBC">OBRERO DE CONTRATA</option>
+                        </select> *</td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Área</td>
+                    <td></td>
+                    <td class="txtIzq">
+                        <input type="hidden" id="hdnAreaNC" name="hdnAreaNC" maxlength="20" class="" />
+                        <input type="text" id="txtAreaNC" name="txtAreaNC" maxlength="100" class="validate[required, minSize[3]]" /> *</td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Centro de costo</td>
+                    <td></td>
+                    <td class="txtIzq">
+                        <input type="hidden" id="hdnCentrocostoNC" name="hdnCentrocostoNC" maxlength="20" class="" />
+                        <input type="text" id="txtCentrocostoNC" name="txtCentrocostoNC" maxlength="100" class="validate[required,minSize[3]]" /> *</td>
+                </tr>
+                <tr>
+                    <td class="txtDer">Empresa</td>
+                    <td></td>
+                    <td class="txtIzq">
+                        <input type="hidden" id="hdnRUCNC" name="hdnRUCNC" maxlength="11" class="" />
+                        <input type="text" id="txtRUCNC" name="txtRUCNC" maxlength="100" class="validate[required, minSize[3]]" /> *</td>
+                </tr>
+                <tr>
+                    <td class="txtDer">¿Es empresa especializada?</td>
+                    <td></td>
+                    <td class="txtIzq">
+                        <input type="checkbox" id="chkFlgTipoEmpNC" name="chkFlgTipoEmpNC" style="width: auto" /></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[15])){ ?>
+<!-- INICIO FORMATO FLUXOGRAMA -->
+<div id="divImpresionLinea" style="width: 100%; height: 100px; background: none; float: left; display: none"></div>
+<div id="divFluxogramaAnual" style="display: none;">
+    <table style="border: solid 0px #FFF; border-collapse: collapse; background-color: #FFF">
+        <tr>
+            <td width="27%" style="height: 80px;">
+                <img src="/images/logopeque.jpg" alt="cup" width="130" style="margin-left: 30px; display: block" />
+            </td>
+            <td width="73%" colspan="3">
+                <div style="font-weight: bold; text-align: center; font-size: 27px;">FLUXOGRAMA DE EXAMEN</div>
+            </td>
+        </tr>
+        <tr>
+            <td width="27%" style="height: 40px;">
+                <div style="font-weight: bold; text-align: center; font-size: 12px;">APELLIDOS Y NOMBRES</div>
+            </td>
+            <td width="43%">
+                <div style="text-align: center;"><span style="font-size: 12px;" id="spanFluxogramaAnualNombre"></span></div>
+            </td>
+            <td width="15%">
+                <div style="font-weight: bold; text-align: center; font-size: 12px;">FECHA</div>
+            </td>
+            <td width="15%">
+                <div style="text-align: center; font-size: 12px;"><?php echo date("d/m/Y"); ?></div>
+            </td>
+        </tr>
+    </table><br />
+    <table style="border: solid 0px #FFF; border-collapse: collapse; background-color: #FFF">
+        <tr>
+            <td width="20%" style="height: 70px; padding-left: 10px">1. LABORATORIO</td><td width="30%"></td>
+            <td width="20%" style="padding-left: 10px">4. ESPIROMETRÍA</td><td width="30%"></td>
+        </tr>
+        <tr>
+            <td style="height: 70px; padding-left: 10px">2. RAYOS X</td><td></td>
+            <td style="padding-left: 10px">5. ODONTOGRAMA</td><td></td>
+        </tr>
+        <tr>
+            <td style="height: 70px; padding-left: 10px">3. AUDIOMETRÍA</td><td></td>
+            <td style="padding-left: 10px">6. FICHA MÉDICA</td><td></td>
+        </tr>
+    </table>
+</div>
+<div id="divFluxogramaEspecial" style="display: none;">
+    <table style="border: solid 0px #FFF; border-collapse: collapse; background-color: #FFF">
+        <tr>
+            <td width="27%" style="height: 80px;">
+                <img src="/images/logopeque.jpg" alt="cup" width="130" style="margin-left: 30px; display: block" />
+            </td>
+            <td width="73%" colspan="3">
+                <div style="font-weight: bold; text-align: center; font-size: 22px;">FLUXOGRAMA DE EXAMEN ESPECIAL
+                    <span style="font-size: 18px">Operadores de equipos pesados</span></div>
+            </td>
+        </tr>
+        <tr>
+            <td width="27%" style="height: 40px;">
+                <div style="font-weight: bold; text-align: center; font-size: 12px;">APELLIDOS Y NOMBRES</div>
+            </td>
+            <td width="43%">
+                <div style="text-align: center;"><span style="font-size: 12px;" id="spanFluxogramaEspecialNombre"></span></div>
+            </td>
+            <td width="15%">
+                <div style="font-weight: bold; text-align: center; font-size: 12px;">FECHA</div>
+            </td>
+            <td width="15%">
+                <div style="text-align: center; font-size: 12px;"><?php echo date("d/m/Y"); ?></div>
+            </td>
+        </tr>
+    </table><br />
+    <table style="border: solid 0px #FFF; border-collapse: collapse; background-color: #FFF">
+        <tr>
+            <td width="20%" style="height: 70px; padding-left: 10px">1. AUDIOMETRÍA</td><td width="30%"></td>
+            <td width="20%" style="padding-left: 10px">4. SECRETARÍA</td><td width="30%"></td>
+        </tr>
+        <tr>
+            <td style="height: 70px; padding-left: 10px">2. ESPIROMETRÍA</td><td></td>
+            <td style="padding-left: 10px">5. FICHA MÉDICA</td><td></td>
+        </tr>
+        <tr>
+            <td style="height: 70px; padding-left: 10px">3. OPTOMETRÍA</td><td></td>
+            <td style="padding-left: 10px"></td><td></td>
+        </tr>
+    </table>
+</div>
+<div id="divDeclaracionJurada" style="display: none;">
+    <table style="border: solid 0px #FFF; border-collapse: collapse; background-color: #FFF">
+        <tr>
+            <td width="27%" style="height: 80px;">
+                <img src="/images/logopeque.jpg" alt="cup" width="130" style="margin-left: 30px; display: block" />
+            </td>
+            <td width="73%">
+                <div style="font-weight: bold; text-align: center; font-size: 25px;">DECLARACIÓN JURADA</div>
+            </td>
+        </tr>
+    </table><br />
+    <table style="border: solid 0px #FFF; border-collapse: collapse; background-color: #FFF">
+        <tr>
+            <td width="100%" colspan="2" style="height: 70px; padding: 10px">
+                <div style="font-size: 14px;">
+                Yo <span id="spanDeclaracionNombre"></span> con DNI N° <span id="spanDeclaracionDNI"></span> <strong>Declaro Bajo Juramento</strong>,
+                que durante mis vacaciones no he estado por debajo de una altitud 2500 msnm, durante tres semanas contínuas.<br /><br />
+                Por lo expuesto firmo el presente documento en señal de conformidad.<br /><br />
+                Fecha <?php echo date("d/m/Y"); ?></div>
+            </td>
+        </tr>
+        <tr>
+            <td style="height: 120px; padding-left: 10px">Firma:</td>
+            <td style="padding-left: 10px">Huella:</td>
+        </tr>
+    </table>
+</div>
+<!-- FIN FORMATO FLUXOGRAMA -->
+<?php } ?>
+<?php if(isset($this->perEsp[20])){ ?>
+<div id="dialogImprimir" title="Imprimir fichas" class="dialogForms" style="overflow: hidden"></div>
+<!-- INICIO AUDIOMETRÍA  -->
+<div id="dialogAudiometria" title="Imprimir Audiometría" class="dialogForms" style="position: relative; overflow: hidden"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Esta pantalla sólo es de visualización para imprimir.
+    </div>
+    <div id="divDialogContenido">
+        <form action="" method="post" id="frmAudiometria" name="frmAudiometria" style="position: relative">
+            <div style="width: 100%; height: 460px; float: left">
+                <div id="divAudiograma" style="height:450px; width:500px; cursor: pointer; float: left;">
+                    <div id="capaTouch" style="position: absolute; top: 0; left: 0; z-index: 10;  padding-left: 47px; padding-top: 3px; padding-right: 20px;
+                     height:447px; width:443px; cursor: pointer;">
+                        <?php
+                        $c = 0;
+                        while($c < 270){
+                            if($c == 0) $aux = 'yv = "130" y = "-10"'; if($c == 10) $aux = 'yv = "125" y = "-5"';
+                            if($c == 20) $aux = 'yv = "120" y = "0"'; if($c == 30) $aux = 'yv = "115" y = "5"';
+                            if($c == 40) $aux = 'yv = "110" y = "10"'; if($c == 50) $aux = 'yv = "105" y = "15"';
+                            if($c == 60) $aux = 'yv = "100" y = "20"'; if($c == 70) $aux = 'yv = "95" y = "25"';
+                            if($c == 80) $aux = 'yv = "90" y = "30"'; if($c == 90) $aux = 'yv = "85" y = "35"';
+                            if($c == 100) $aux = 'yv = "80" y = "40"'; if($c == 110) $aux = 'yv = "75" y = "45"';
+                            if($c == 120) $aux = 'yv = "70" y = "50"'; if($c == 130) $aux = 'yv = "65" y = "55"';
+                            if($c == 140) $aux = 'yv = "60" y = "60"'; if($c == 150) $aux = 'yv = "55" y = "65"';
+                            if($c == 160) $aux = 'yv = "50" y = "70"'; if($c == 170) $aux = 'yv = "45" y = "75"';
+                            if($c == 180) $aux = 'yv = "40" y = "80"'; if($c == 190) $aux = 'yv = "35" y = "85"';
+                            if($c == 200) $aux = 'yv = "30" y = "90"'; if($c == 210) $aux = 'yv = "25" y = "95"';
+                            if($c == 220) $aux = 'yv = "20" y = "100"'; if($c == 230) $aux = 'yv = "15" y = "105"';
+                            if($c == 240) $aux = 'yv = "10" y = "110"'; if($c == 250) $aux = 'yv = "5" y = "115"';
+                            if($c == 260) $aux = 'yv = "0" y = "120"';
+                            ?>
+                        <div xv="10" x="250" <?php echo $aux; ?> class="ctx" id="ct<?php echo ($c+1); ?>" style="float: left; width: 34px; height: 15px; margin: 0 1px 1px 0; background: #FFF; opacity:0.1;filter:alpha(opacity=10);"></div>
+                        <div class="ctes1" style="float: left; width: 34px; height: 15px; margin: 0 1px 1px 0;"></div>
+                        <div xv="30" x="500" <?php echo $aux; ?> class="ct" id="ct<?php echo ($c+2); ?>" style="float: left; width: 34px; height: 15px; margin: 0 1px 1px 0; background: #FFF; opacity:0.1;filter:alpha(opacity=10);"></div>
+                        <div xv="40" x="750" <?php echo $aux; ?> class="ctx" id="ct<?php echo ($c+3); ?>" style="float: left; width: 34px; height: 15px; margin: 0 1px 1px 0; background: #FFF; opacity:0.1;filter:alpha(opacity=10);"></div>
+                        <div class="ctes2" style="float: left; width: 9px; height: 15px; margin: 0 1px 1px 0;"></div>
+                        <div xv="53" x="1000" <?php echo $aux; ?> class="ct" id="ct<?php echo ($c+4); ?>" style="float: left; width: 34px; height: 15px; margin: 0 1px 1px 0; background: #FFF; opacity:0.1;filter:alpha(opacity=10);"></div>
+                        <div xv="63" x="1500" <?php echo $aux; ?> class="ctx" id="ct<?php echo ($c+5); ?>" style="float: left; width: 34px; height: 15px; margin: 0 1px 1px 0; background: #FFF; opacity:0.1;filter:alpha(opacity=10);"></div>
+                        <div class="ctes2" style="float: left; width: 9px; height: 15px; margin: 0 1px 1px 0;"></div>
+                        <div xv="76" x="2000" <?php echo $aux; ?> class="ct" id="ct<?php echo ($c+6); ?>" style="float: left; width: 34px; height: 15px; margin: 0 1px 1px 0; background: #FFF; opacity:0.1;filter:alpha(opacity=10);"></div>
+                        <div xv="86" x="3000" <?php echo $aux; ?> class="ct" id="ct<?php echo ($c+7); ?>" style="float: left; width: 34px; height: 15px; margin: 0 1px 1px 0; background: #FFF; opacity:0.1;filter:alpha(opacity=10);"></div>
+                        <div class="ctes2" style="float: left; width: 9px; height: 15px; margin: 0 1px 1px 0;"></div>
+                        <div xv="99" x="4000" <?php echo $aux; ?> class="ct" id="ct<?php echo ($c+8); ?>" style="float: left; width: 34px; height: 15px; margin: 0 1px 1px 0; background: #FFF; opacity:0.1;filter:alpha(opacity=10);"></div>
+                        <div xv="109" x="6000" <?php echo $aux; ?> class="ct" id="ct<?php echo ($c+9); ?>" style="float: left; width: 34px; height: 15px; margin: 0 1px 1px 0; background: #FFF; opacity:0.1;filter:alpha(opacity=10);"></div>
+                        <div class="ctes2" style="float: left; width: 9px; height: 15px; margin: 0 1px 1px 0;"></div>
+                        <div xv="122" x="8000" <?php echo $aux; ?> class="ct" id="ct<?php echo ($c+10); ?>" style="float: left; width: 34px; height: 15px; margin: 0 1px 1px 0; background: #FFF; opacity:0.1;filter:alpha(opacity=10); "></div>
+                        <?php
+                            $c+=10;
+                        }
+                        ?>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- FIN AUDIOMETRÍA -->
+<?php } ?>
+<script type="text/javascript">
+$(document).ready(function(){
+    <?php if(isset($this->perEsp[13])){ ?>
+    var dept = "", dist = "", prov = "";
+    $("#btnNuevo").button({ icons: { primary: "ui-icon-plus" } });
+    $("#btnNuevo").click(function(){ $("#dialogNuevoUsuario").dialog("open"); });
+    $("#txtRUC").keydown(function(e){ if(e.which !== 9 && !e.shiftKey) { $("#hdnRUC").val(""); } });
+    $("#txtRUC").autocomplete({
+        source: function( request, response ) {
+            $.ajax({
+                url: "/evaluacion/empresaespecializadaautocompletar/", dataType: "json", data: { term: request.term },
+                success: function(data) { response($.map(data, function(item) { return { label: $.trim(item.descr_ctta), id: $.trim(item.num_ruc) }; })); }
+            });
+        }, minLength: 3, select: function(event, ui) { $("#hdnRUC").val(ui.item.id); }
+    });
+    $("#txtFechaNacimiento").datepicker({ defaultDate: "0", changeMonth: true, maxDate: "-18Y", changeMonth: true, changeYear: true, dateFormat: "dd/mm/yy", yearRange: "<?php echo (date("Y") - 90); ?>:<?php echo (date("Y") - 18); ?>" });
+    $("#txtFechaIngreso").datepicker({ defaultDate: "0", changeMonth: true, maxDate: "+3M", changeMonth: true, changeYear: true, dateFormat: "dd/mm/yy" });
+    $("#txtFechaCita").datepicker({ defaultDate: "0", changeMonth: true, minDate: "0", maxDate: "+2M", dateFormat: "dd/mm/yy" });
+    $("#selDepartamento").change(function(){
+        $.ajax({ url: '/ubigeo/listarprovincia/', type: "POST", data: "idDepartamento="+$("#selDepartamento").val(),
+            beforeSend:function(){ $(".divCargadorProvincia").css("display","inline"); $("#selProvincia").attr("disabled", true); $("#selDistrito").attr("disabled", true); },
+            success: function(data) {
+                var obj = $("#selDistrito");
+                obj.html(""); obj.append('<option value="">Seleccione</option>'); obj.attr("disabled", false);
+                obj = $("#selProvincia");
+                obj.html(""); obj.append('<option value="">Seleccione</option>');
+                $.each($.parseJSON(data), function(i,row){ obj.append('<option value="'+i+'">'+row+'</option>'); });
+                $(".divCargadorProvincia").css("display","none");
+                obj.attr("disabled", false);
+                $('#dialogNuevoUsuario #selProvincia').val(prov).change();
+            }
+        }); 
+    });
+    $("#selProvincia").change(function(){
+        $.ajax({ url: '/ubigeo/listardistrito/', type: "POST", data: "idDepartamento="+$("#selDepartamento").val()+"&idProvincia="+$("#selProvincia").val(),
+            beforeSend:function(){ $(".divCargadorDistrito").css("display","inline"); $("#selDistrito").attr("disabled", true); },
+            success: function(data) {
+                var obj = $("#selDistrito");
+                obj.html(""); obj.append('<option value="">Seleccione</option>');
+                $.each(jQuery.parseJSON(data), function(i,row){ obj.append('<option value="'+i+'">'+row+'</option>'); });
+                $(".divCargadorDistrito").css("display","none"); obj.attr("disabled", false);
+                $('#dialogNuevoUsuario #selDistrito').val(dist);
+            }
+        }); 
+    });
+    $("#dialogNuevoUsuario, #txtPuesto").autocomplete({
+        source: function( request, response ) { $.ajax({ url: "/evaluacion/puestoautocompletar/", dataType: "json", data: { term: request.term }, success: function(data) { response($.map(data, function(item) { return { label: $.trim(item.Puesto) }; })); } }); }, minLength: 3
+    });
+    $("#dialogNuevoUsuario #txtApellidoPaterno").autocomplete({
+        source: function( request, response ) {
+            $.ajax({ url: "/usuario/listarrrhh/", dataType: "json",
+                data: { term: request.term,  compania: $('#selCompaniaUsuarioFiltro').val(), localidad: $('#selLocalidadUsuarioFiltro').val() },
+                success: function(data) { response($.map(data, function(item) { return {
+                    label: item.Nombres + " " + item.Ap_Paterno + " " + item.Ap_Materno,nombres: item.Nombres,          apellidosp: item.Ap_Paterno,
+                    apellidosm: item.Ap_Materno,    dni: item.DNI,                      fechanacimiento: item.fechanac, sexo: item.Sexo,
+                    puesto: item.Puesto,            fechainicio: item.fechaini,         dept: item.dept_nac,            prov: item.prov_nac,
+                    dist: item.dist_nac,            gradoinst: item.Grado_Instruccion,  estadocivil: item.Estado_Civil, tipotrab: item.tipotrab,
+                    area: item.id_Area,             centrocosto: item.centrocosto,      flgcontrata: item.ind_contrata, ruc: item.emp_espec }; }));
+                }
+            });
+        }, minLength: 2,
+        select: function(event, ui) {
+            setTimeout(function(){ $('#dialogNuevoUsuario #txtApellidoPaterno').val(ui.item.apellidosp).attr("readonly",true); },100);
+            $('#dialogNuevoUsuario #txtApellidoMaterno').val(ui.item.apellidosm).attr("readonly",true);
+            $('#dialogNuevoUsuario #txtNombres').val(ui.item.nombres).attr("readonly",true);
+            $('#dialogNuevoUsuario #txtDNI').val(ui.item.dni).attr("readonly",true);
+            var x = ui.item.fechanacimiento.split(" ");
+            x = x[0].split("-");
+            x = x[2]+"/"+x[1]+"/"+x[0];
+            $('#dialogNuevoUsuario #txtFechaNacimiento').val(x).attr("readonly",true);
+            x = ui.item.fechainicio.split(" ");
+            x = x[0].split("-");
+            x = x[2]+"/"+x[1]+"/"+x[0];
+            $('#dialogNuevoUsuario #txtFechaIngreso').val(x).attr("readonly",true);
+            $('#dialogNuevoUsuario input[name=rdSexo][value='+ui.item.sexo+']').click();
+            dept = ui.item.dept; prov = ui.item.prov; dist = ui.item.dist;
+            $('#dialogNuevoUsuario #selDepartamento').val(ui.item.dept).change(); 
+            $('#dialogNuevoUsuario #txtPuesto').val(ui.item.puesto);
+            $('#dialogNuevoUsuario #txtGradoInstruccion').val(ui.item.gradoinst);
+            $('#dialogNuevoUsuario #selEstadoCivil').val(ui.item.estadocivil);
+            $('#dialogNuevoUsuario #txtTipotrabajador').val(ui.item.tipotrab);
+            $('#dialogNuevoUsuario #hdnArea').val(ui.item.area);
+            $('#dialogNuevoUsuario #hdnCentrocosto').val(ui.item.centrocosto);
+            $('#dialogNuevoUsuario #hdnRUC').val(ui.item.ruc);
+            if(ui.item.flgcontrata == 1) $('#dialogNuevoUsuario #chkFlgTipoEmp').click();
+            $.ajax({ url: "/empleado/arealistar/", type: "POST", data: "term="+ui.item.area, success: function(data) { $('#dialogNuevoUsuario #txtArea').val(data); } });
+            $.ajax({ url: "/empleado/centrocostolistar/", type: "POST", data: "term="+ui.item.centrocosto, success: function(data) { $('#dialogNuevoUsuario #txtCentrocosto').val("("+ui.item.centrocosto+") "+data); } });
+            $.ajax({ url: "/empleado/ruclistar/", type: "POST", data: "term="+ui.item.ruc, success: function(data) { $('#dialogNuevoUsuario #txtRUC').val(data); } });
+            $('#dialogNuevoUsuario #selMotivo').focus();
+        }
+    });
+    $("#selCompaniaUsuario").change(function(){
+        $.ajax({ url: '/localidad/listar/', type: "POST", data: $("#frmNuevoUsuario").serialize(),
+            beforeSend:function(){ $(".divCargadorPequeno").css("display","inline"); $("#selLocalidadUsuario").attr("disabled", true); },
+            success: function(data) {
+                var obj = $("#selLocalidadUsuario");
+                obj.html(""); obj.append('<option value="">Seleccione</option>');
+                $.each(jQuery.parseJSON(data), function(i,row){ obj.append('<option value="'+i+'">'+row+'</option>'); });
+                $(".divCargadorPequeno").css("display","none");
+                obj.attr("disabled", false);
+                $('#dialogNuevoUsuario #txtNombres').attr("disabled", true);
+                $('#dialogNuevoUsuario #txtNombres').val("");
+                $('#dialogNuevoUsuario #txtApellidos').val("");
+            }
+        }); 
+    });
+    $("#selLocalidadUsuario").change(function(){
+        if($("#selLocalidadUsuario").val() != ""){ $('#dialogNuevoUsuario #txtNombres').attr("disabled", false); $('#dialogNuevoUsuario #txtNombres').focus();
+        }else{ $('#dialogNuevoUsuario #txtNombres').attr("disabled", true); $('#dialogNuevoUsuario #txtNombres').val(""); $('#dialogNuevoUsuario #txtApellidos').val(""); }
+    });
+    $("#dialogNuevoUsuario").dialog({
+        closeOnEscape: false, autoOpen: false, height: 560, width: 720, modal: true, resizable: false,
+        open: function(){
+            js_resetForm("#dialogNuevoUsuario");
+            $('#dialogNuevoUsuario #txtApellidoPaterno').attr("readonly",false)
+            $('#dialogNuevoUsuario #txtApellidoMaterno').attr("readonly",false);
+            $('#dialogNuevoUsuario #txtNombres').attr("readonly",false);
+            $('#dialogNuevoUsuario #txtDNI').attr("readonly",false);
+            $('#dialogNuevoUsuario #txtFechaNacimiento').attr("readonly",false);
+            $('#dialogNuevoUsuario #txtFechaIngreso').attr("readonly",false);            
+            js_validarDNU();
+            var divMensaje = $("#dialogNuevoUsuario #divMensaje");
+            divMensaje.html("&nbsp;");
+            $("#dialogNuevoUsuario #hdnIdCompania").val($("#selCompaniaUsuarioFiltro").val());
+            $("#dialogNuevoUsuario #hdnIdLocalidad").val($("#selLocalidadUsuarioFiltro").val());
+            $("body").css("overflow","hidden");$(".ui-widget-overlay").css("width","100%"); 
+        },
+        buttons:{ "Guardar": function(){ $("#frmNuevoUsuario").submit(); }, "Cancelar": function(){ $(this).dialog("close"); } },
+        close: function() { $("#frmNuevoUsuario").validationEngine("hideAll"); }
+    });
+    <?php } ?>
+    <?php if(isset($this->perEsp[22])){ ?>
+    $("#dialogNuevaCita").dialog({
+        closeOnEscape: false, autoOpen: false, height: 540, width: 350, modal: true, resizable: false,
+        open: function(){
+            var contenidoaux, objp;
+            objp = "#dialogNuevaCita";
+            js_resetForm(objp);
+            $("#txtFechaCitaNC").datepicker("destroy");
+            $.ajax({
+                url: "/empleado/tomarcita/", type: "POST", data: "idUsuario=" + idUsuario,
+                beforeSend:function(){ contenidoaux = $(objp + " #divDialogContenido").html(); $(objp + " #divDialogContenido").html(msjCargando); },
+                success: function(data) {
+                    var objs = $.parseJSON(data);
+                    $(objp + " #divDialogContenido").html(contenidoaux);
+                    $(objp + " #hdnIdEmpleadoNC").val(idUsuario);
+                    $(objp + " #hdnIdCompaniaNC").val($("#selCompaniaUsuarioFiltro").val());
+                    $(objp + " #hdnIdLocalidadNC").val($("#selLocalidadUsuarioFiltro").val());
+                    $(objp + " #txtPuestoNC").val($.trim(objs.puesto));
+                    $(objp + " #txtTelefonoNC").val($.trim(objs.telefono));
+                    $(objp + " #txtGradoInstruccionNC").val($.trim(objs.gradoinstruccion));
+                    $(objp + " #selEstadoCivilNC").val($.trim(objs.estadocivil));
+                    $(objp + " #txtTipotrabajadorNC").val($.trim(objs.tipotrabajador));
+                    $(objp + " #txtCentrocostoNC").val("("+$.trim(objs.centrocosto)+") "+$.trim(objs.nomcentrocosto));
+		    
+                    $(objp + " #hdnCentrocostoNC").val($.trim(objs.centrocosto));
+                    $(objp + " #txtAreaNC").val($.trim(objs.nomarea));
+                    $(objp + " #hdnAreaNC").val($.trim(objs.area));
+                    $(objp + " #txtRUCNC").val($.trim(objs.nombreempresa));
+                    $(objp + " #hdnRUCNC").val($.trim(objs.rucempresaespecializada));
+                    if(objs.flgtipoempresa == 1) $(objp + " #chkFlgTipoEmpNC").click();                                        
+                    $(objp + " #selMotivoNC").focus();
+                    var divMensaje = $(objp + " #divMensajeNC");
+                    divMensaje.html("&nbsp;");
+                    js_validarDNC();
+                }
+            });
+        },
+        buttons:{ "Guardar": function(){ $("#frmNuevaCita").submit(); }, "Cancelar": function(){ $(this).dialog("close"); } },
+        close: function() { $("#frmNuevaCita").validationEngine("hideAll"); }
+    });
+    <?php } ?>
+    <?php if(isset($this->perEsp[23])){ ?>
+    $("#dialogModificarUsuario").dialog({
+        closeOnEscape: false, autoOpen: false, height: 520, width: 370, modal: true, resizable: false,
+        open: function(){ js_resetForm("#dialogModificarUsuario"); var divMensaje = $("#divMensaje"); divMensaje.html("&nbsp;"); },
+        buttons:{ "Guardar": function(){ $("#frmModificarUsuario").submit(); }, "Cancelar": function(){ $(this).dialog("close"); } },
+        close: function() { $("#frmModificarUsuario").validationEngine("hideAll"); }
+    });
+    <?php } ?>
+    <?php if(isset($this->perEsp[24])){ ?>
+    $("#dialogEliminarUsuario").dialog({
+        closeOnEscape: false, autoOpen: false, height: 160, width: 370, modal: true, resizable: false,
+        buttons:{
+            "Sí": function(){ $.ajax({ url: '/empleado/eliminar/', type: "POST", data: "idEmpleado=" + idUsuario, success: function(data) { $("#jqtblContenido").trigger("reloadGrid"); js_mensajeGeneral(data); $("#dialogEliminarUsuario").dialog("close"); } }); },
+            "No": function(){ $(this).dialog("close"); }
+        }
+    });
+    <?php } ?>
+    <?php if(isset($this->perEsp[17])){ ?>
+    $("#dialogModificarCita").dialog({
+        closeOnEscape: false, autoOpen: false, height: 520, width: 370, modal: true, resizable: false,
+        open: function(){ js_resetForm("#dialogModificarCita"); var divMensaje = $("#divMensajeCita"); divMensaje.html("&nbsp;"); },
+        buttons:{ "Guardar": function(){ $("#frmModificarCita").submit(); }, "Cancelar": function(){ $(this).dialog("close"); } },
+        close: function() { $("#frmModificarCita").validationEngine("hideAll"); }
+    });
+    <?php } ?>
+    <?php if(isset($this->perEsp[16])){ ?>
+    $("#dialogCancelarCita").dialog({
+        closeOnEscape: false, autoOpen: false, height: 160, width: 370, modal: true, resizable: false,
+        buttons:{
+            "Sí": function(){  $.ajax({ url: '/empleado/cancelarcita/', type: "POST", data: "idCita=" + idCita, success: function(data) { $("#jqtblContenidoCita").trigger("reloadGrid"); $("#dialogCancelarCita").dialog("close"); } }); },
+            "No": function(){ $(this).dialog("close"); }
+        }
+    }); 
+    <?php } ?>
+    <?php if(isset($this->perEsp[18])){ ?>
+    $("#dialogEliminarCita").dialog({
+        closeOnEscape: false, autoOpen: false, height: 160, width: 370, modal: true, resizable: false,
+        buttons:{
+            "Sí": function(){  $.ajax({ url: '/empleado/eliminarcita/', type: "POST", data: "idCita=" + idCita, success: function(data) { $("#jqtblContenidoCita").trigger("reloadGrid"); $("#dialogEliminarCita").dialog("close"); } }); },
+            "No": function(){ $(this).dialog("close"); }
+        }
+    });
+    <?php } ?>
+    <?php if(isset($this->perEsp[15])){ ?>
+    $("#dialogDeclaracionJuradaPreguntar").dialog({
+        closeOnEscape: false, autoOpen: false, height: 160, width: 370, modal: true, resizable: false,
+        buttons:{ "Sí": function(){ js_iniciarCita(8); $(this).dialog("close");}, "No": function(){ js_iniciarCita(6); $(this).dialog("close");} }
+    });
+    <?php } ?>
+    <?php if(isset($this->perEsp[14])){ ?>
+    $("#dialogCita").dialog({
+        closeOnEscape: false, autoOpen: false, height: 600, width: 1000, modal: true, resizable: false,
+        buttons:{ "Cerrar": function(){ $(this).dialog("close"); } }
+    });
+    <?php } ?>
+    <?php if(isset($this->perEsp[20])){ ?>
+    $("#dialogImprimir").dialog({
+        closeOnEscape: false, autoOpen: false, height: 150, width: 200, modal: true, resizable: false,
+        open: function(){ 
+            $("#dialogImprimir").dialog("option", "height", 150);
+            $("#dialogImprimir").dialog("option", "width", 200);
+            $("#dialogImprimir").dialog("option", "position", 'center');
+            $("#dialogImprimir").empty();
+            $("#dialogImprimir").html("<div id='pdfcargando' style='margin: 15px 0px 100px 50px'><img src='/images/cargando.gif' /> Cargando...</div>");
+            var content = "<iframe id='ifpdf' src='/evaluacion/generapdf/idcita/" + idCita + "/' style='background-color:transparent;' allowtransparency='allowtransparency' frameborder='0' width='100%' height='500'></iframe>";
+            $("#dialogImprimir").append(content);
+            var asignar = setInterval(function(){
+                if(document.getElementById('ifpdf')){
+                    if(window.ActiveXObject){
+                        document.getElementById('ifpdf').onreadystatechange=function(){
+                            if(document.getElementById('ifpdf').readyState=='complete'){
+                                $("#dialogImprimir").dialog("option", "height", 600);
+                                $("#dialogImprimir").dialog("option", "width", 1200);
+                                $("#dialogImprimir").dialog("option", "position", 'center');
+                                $("#pdfcargando").remove();
+                            }
+                        }
+                        clearInterval(asignar);
+                        return;
+                    }
+                    document.getElementById('ifpdf').onload = function(){
+                        $("#dialogImprimir").dialog("option", "height", 600);
+                        $("#dialogImprimir").dialog("option", "width", 1200);
+                        $("#dialogImprimir").dialog("option", "position", 'center');
+                        $("#pdfcargando").remove();
+                    }
+                    clearInterval(asignar);
+                }
+            },10);
+        },
+        buttons:{ "Cerrar": function(){ $(this).dialog("close"); } },
+        close: function() { $("#dialogImprimir").empty(); }
+    });
+    $("#dialogAudiometria").dialog({
+        closeOnEscape: false,
+        autoOpen: false,
+        height: 600,
+        width: 550,
+        modal: true,
+        resizable: false,
+        open: function(){
+            var contenidoaux, objp, obj, divMensaje;
+            objp = "#dialogAudiometria";
+            $.ajax({
+                url: "/evaluacion/audiometria/",
+                type: "POST",
+                data: "idCita=" + idCita + "&idMotivo=" + idMotivo,
+                beforeSend:function(){
+                    contenidoaux = $(objp + " #divDialogContenido").html();
+                    $(objp + " #divDialogContenido").html(msjCargando);
+                },
+                success: function(data) {
+                    obj = $.parseJSON(data);
+                    $(objp + " #divDialogContenido").html(contenidoaux);
+                    $.each(obj.audiometria, function(i,row){
+                        sinPoints = ["null"]; 
+                        powPoints = ["null"]; 
+                        powPoints.push(["30",js_audiogramay(row.ad1)]);
+                        powPoints.push(["53",js_audiogramay(row.ad2)]);
+                        powPoints.push(["76",js_audiogramay(row.ad3)]);
+                        powPoints.push(["86",js_audiogramay(row.ad4)]);
+                        powPoints.push(["99",js_audiogramay(row.ad5)]);
+                        powPoints.push(["109",js_audiogramay(row.ad6)]);
+                        powPoints.push(["122",js_audiogramay(row.ad7)]);
+
+                        sinPoints.push(["30",js_audiogramay(row.ai1)]);
+                        sinPoints.push(["53",js_audiogramay(row.ai2)]);
+                        sinPoints.push(["76",js_audiogramay(row.ai3)]);
+                        sinPoints.push(["86",js_audiogramay(row.ai4)]);
+                        sinPoints.push(["99",js_audiogramay(row.ai5)]);
+                        sinPoints.push(["109",js_audiogramay(row.ai6)]);
+                        sinPoints.push(["122",js_audiogramay(row.ai7)]);
+                    });
+                    js_validarDAU();
+                }
+            }); 
+        },
+        buttons:{
+            "Imprimir": function(){ window.print(); },
+            "Cerrar": function(){ $(this).dialog("close"); }
+        }
+    });
+    function js_audiogramay($c){
+        if($c == 0) return 120; if($c == 5) return 115;
+        if($c == 10) return 110; if($c == 15) return 105;
+        if($c == 20) return 100; if($c == 25) return 95;
+        if($c == 30) return 90; if($c == 35) return 85;
+        if($c == 40) return 80; if($c == 45) return 75;
+        if($c == 50) return 70; if($c == 55) return 65;
+        if($c == 60) return 60; if($c == 65) return 55;
+        if($c == 70) return 50; if($c == 75) return 45;
+        if($c == 80) return 40; if($c == 85) return 35;
+        if($c == 90) return 30; if($c == 95) return 25;
+        if($c == 100) return 20; if($c == 105) return 15;
+        if($c == 110) return 10; if($c == 115) return 5;
+        if($c == 120) return 0; if($c == -5) return 125;
+        if($c == -10) return 130;
+    }
+    var sinPoints = ["null"]; 
+    var powPoints = ["null"]; 
+    var plot1;
+    function js_audiogramaclick(){
+        var x = $("#divAudiograma").html();
+        plot1.series[0].data = sinPoints;
+        plot1.series[1].data = powPoints;
+        plot1.replot({resetAxes:true});
+        $("#divAudiograma").prepend(x);
+    }
+    function js_validarDAU(){
+        var objs, divMensaje;
+        var obj = "#frmAudiometria";
+        $("body").css("overflow","hidden");$(".ui-widget-overlay").css("width","100%");
+        
+        var grid = { gridLineWidth: 1.1, gridLineColor: 'rgb(235,235,235)', drawGridlines: true };
+        plot1 = "";
+        plot1 = $.jqplot('divAudiograma', [sinPoints, powPoints], { 
+            seriesColors: [ "#0066FF", "#CC3300"],
+            seriesDefaults: { rendererOptions: { smooth: false } },
+            series:[ { markerOptions: { style:"x" } }, { markerOptions: { style:"circle" } } ],
+            axes:{
+                xaxis:{
+                    ticks: [[0,""], [10,"250"],[30, "500"],[40, "750"],[53, "1000"],[63, "1500"],[76, "2000"], [86, "3000"],[99, "4000"],[109, "6000"],[122, "8000"],[132, ""]],
+                    labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                    tickOptions:{ 
+                        fontSize:'10pt', 
+                        fontFamily:'Tahoma'
+                    }
+                },
+                yaxis:{
+                    ticks: [[0,"120"], [5,""],[10, "110"],[15, ""],[20, "100"],[25, ""],[30, "90"], [35, ""],[40, "80"],[45, ""],[50, "70"],[55, ""],[60, "60"],[65, ""], [70, "50"],[75, ""],[80, "40"],[85, ""],[90, "30"],[95, ""],[100, "20"], [105, ""],[110, "10"],[115, ""],[120, "0"],[125, ""],[130, "10"]],
+                    labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                    tickOptions:{ 
+                        fontSize:'10pt', 
+                        fontFamily:'Tahoma'
+                    }
+                }
+            },
+            grid: grid,
+            canvasOverlay: { show: true, objects: [ { horizontalLine: { name: 'barney', y: 100, lineWidth: 2, color: '#CC3300', shadow: false } } ] }
+        });
+        js_audiogramaclick();
+    }
+    <?php } ?>
+    <?php if(isset($this->perEsp[21])){ ?>
+    $("#dialogSubirArchivos").dialog({
+        closeOnEscape: false, autoOpen: false, height: 500, width: 390, modal: true, resizable: false,
+        open: function(){
+            var objp; var motivo = $("#hdnIdMotivo").val(); objp = "#dialogSubirArchivos"; js_resetForm(objp);
+            <?php  $c = 1; while($c <= 3){ ?> $("#sf"+<?php echo $c; ?>).html(""); $("#tr"+<?php echo $c; ?>).css("display",""); <?php $c++; } ?>
+            if(motivo != 1 && motivo != 2 && motivo != 4 && motivo != 5){ $("#tr2").css("display","none"); $("#tr3").css("display","none");  }
+            if(motivo == 1 || motivo == 2 || motivo == 4 || motivo == 5) $(this).dialog("option", "height", 270);
+            else $(this).dialog("option", "height", 210);
+            $(this).dialog("option", "position", { my: "center", at: "center", of: window });
+            $.ajax({ url: '/evaluacion/archivonombres/', type: "POST", data: "cita=" + idCita,
+                success: function(data) {
+                    $.each($.parseJSON(data), function(i,row){
+                        if(row.d1 != "") $("#sf1").html(" <span style='color: green'>Subido</span>");
+                        if(row.d2 != "") $("#sf2").html(" <span style='color: green'>Subido</span>");
+                        if(row.d3 != "") $("#sf3").html(" <span style='color: green'>Subido</span>");
+                    });
+                }
+            }); 
+        },
+        buttons:{
+            "Guardar": function(){
+                <?php  $c = 1; while($c <= 3){ ?>
+                $.ajaxFileUpload({
+                    url: '/evaluacion/archivosubir/', secureuri: false, fileElementId: 'file<?php echo $c; ?>', dataType: 'json',
+                    data:{ cita: idCita, file: <?php echo $c; ?> },
+                    success: function (data, status){ if(typeof(data.error) != 'undefined'){ if(data.error != ''){ $("#sf"+<?php echo $c; ?>).html(" <span style='color: red'>Error</span>"); }else{ $("#sf"+<?php echo $c; ?>).html(" <span style='color: green'>Subido</span>"); } }else alert("Error desconocido."); },
+                    error: function (data, status, e){ alert(e); }
+                });
+                <?php $c++; } ?>
+            },
+            "Cancelar": function(){ $(this).dialog("close"); }
+        }
+    });
+    <?php } ?>
+    eventsMenu = {
+        bindings:{
+            <?php if(isset($this->perEsp[23])){ ?>
+            'modificar':function(t){
+                idUsuario = t.id;
+                var contenidoaux;
+                $("#dialogModificarUsuario").dialog("open");
+                $("#dialogModificarUsuario #txtFechaNacimiento2").datepicker("destroy");
+                $("#dialogModificarUsuario #txtFechaIngreso2").datepicker("destroy");
+                var obj = $("#dialogModificarUsuario #selProvincia2");
+                obj.html("").append('<option value="">Seleccione</option>');
+                obj = $("#dialogModificarUsuario #selDistrito2");
+                obj.html("").append('<option value="">Seleccione</option>');
+                $.ajax({ url: '/empleado/modificar/', type: "POST", data: "hdnIdEmpleado=" + idUsuario + "&hdnOpcion=1",
+                    beforeSend:function(){
+                        contenidoaux = $("#dialogModificarUsuario #divDialogContenido").html();
+                        $("#dialogModificarUsuario #divDialogContenido").html(msjCargando);
+                    }, success: function(data) {
+                        var objs = jQuery.parseJSON(data);
+                        $("#dialogModificarUsuario #divDialogContenido").html(contenidoaux);
+                        $("#dialogModificarUsuario #hdnIdEmpleado").val(objs.idEmpleado);
+                        $("#dialogModificarUsuario #txtApellidoPaterno2").val(objs.appaterno);
+                        $("#dialogModificarUsuario #txtApellidoMaterno2").val(objs.apmaterno);
+                        $("#dialogModificarUsuario #txtNombres2").val(objs.nombres);
+                        $("#dialogModificarUsuario #txtDNI2").val(objs.dni);
+                        $("#dialogModificarUsuario #txtFechaNacimiento2").val(objs.fechanacimiento);
+                        $("#dialogModificarUsuario #selDepartamento2").val(objs.deptnac);
+                        $.ajax({ url: '/ubigeo/listarprovincia/', type: "POST", data: "idDepartamento="+objs.deptnac,
+                            success: function(data) {
+                                obj = $("#dialogModificarUsuario #selProvincia2");
+                                obj.html("").append('<option value="">Seleccione</option>');
+                                $.each($.parseJSON(data), function(i,row){ obj.append('<option value="'+i+'">'+row+'</option>'); });
+                                $("#dialogModificarUsuario #selProvincia2").val(objs.provnac);
+                            }
+                        });
+                        $.ajax({ url: '/ubigeo/listardistrito/', type: "POST", data: "idDepartamento="+objs.deptnac+"&idProvincia="+objs.provnac,
+                            success: function(data) {
+                                obj = $("#dialogModificarUsuario #selDistrito2");
+                                obj.html("");
+                                obj.append('<option value="">Seleccione</option>');
+                                $.each(jQuery.parseJSON(data), function(i,row){ obj.append('<option value="'+i+'">'+row+'</option>'); });
+                                $("#dialogModificarUsuario #selDistrito2").val(objs.distnac);
+                            }
+                        });
+                        $("#dialogModificarUsuario #rdSexo2").filter('[value='+objs.sexo+']').attr('checked', true);
+                        $("#dialogModificarUsuario #txtFechaIngreso2").val(objs.fechaingreso);
+                        $("#dialogModificarUsuario #txtApellidoPaterno2").focus();
+                        js_validarDMU();
+                    }
+                });
+            },
+            <?php } ?>
+            <?php if(isset($this->perEsp[22])){ ?>
+            'nuevacita':function(t){ idUsuario = t.id; $("#dialogNuevaCita").dialog("open"); },
+            <?php } ?>
+            <?php if(isset($this->perEsp[24])){ ?>
+            'eliminar':function(t){ idUsuario = t.id; $("#dialogEliminarUsuario").dialog("open"); },
+            <?php } ?>
+            <?php if(isset($this->perEsp[14])){ ?>
+            'cita':function(t){ idUsuario = t.id; $("#dialogCita").dialog("open"); js_cita(); }
+            <?php } ?>
+        }
+    }
+    eventsMenuCita = {
+        bindings:{
+            <?php if(isset($this->perEsp[17])){ ?>
+            'modificarcita':function(t){
+                idCita = t.id;
+                var contenidoaux;
+                $("#dialogModificarCita").dialog("open");
+                $("#dialogModificarCita #txtFechaCita2").datepicker("destroy");
+                $.ajax({ url: '/empleado/modificarcita/', type: "POST", data: "hdnIdCita=" + idCita + "&hdnOpcion=1",
+                    beforeSend:function(){
+                        contenidoaux = $("#dialogModificarCita #divDialogContenido").html();
+                        $("#dialogModificarCita #divDialogContenido").html(msjCargando);
+                    },
+                    success: function(data) {
+                        var objs = jQuery.parseJSON(data);
+                        $("#dialogModificarCita #divDialogContenido").html(contenidoaux);
+                        $("#dialogModificarCita #hdnIdCita").val(objs.idCita);
+                        $("#dialogModificarCita #hdnMotivo").val(objs.motivo);
+                        $("#dialogModificarCita #selMotivo2").val(objs.motivo);
+                        $("#dialogModificarCita #selMotivo2").attr("disabled", true);
+                        $("#dialogModificarCita #txtFechaCita2").val(objs.fecha);
+                        $("#dialogModificarCita #txtPuesto2").val($.trim(objs.puesto));
+                        $("#dialogModificarCita #txtTelefono2").val($.trim(objs.telefono));
+                        $("#dialogModificarCita #txtGradoInstruccion2").val($.trim(objs.gradoinstruccion));
+                        $("#dialogModificarCita #selEstadoCivil2").val(objs.estadocivil);
+                        $("#dialogModificarCita #txtTipotrabajador2").val(objs.tipotrabajador);
+                        $("#dialogModificarCita #txtArea2").val($.trim(objs.nomarea));
+                        $("#dialogModificarCita #hdnArea2").val($.trim(objs.area));
+                        $("#dialogModificarCita #txtCentrocosto2").val("("+$.trim(objs.centrocosto)+") "+$.trim(objs.nomcentrocosto));
+                        $("#dialogModificarCita #hdnCentrocosto2").val($.trim(objs.centrocosto));
+                        $("#dialogModificarCita #txtRUC2").val($.trim(objs.nomempresa));
+                        $("#dialogModificarCita #hdnRUC2").val($.trim(objs.rucempresaespecializada));
+                        $("#dialogModificarCita #chkFlgTipoEmp2").attr('checked', (objs.flgtipoempresa == 1)?true:false);  
+                        $("#dialogModificarCita #selMotivo2").focus();
+                        $("#txtRUC2").keydown(function(e){ if(e.which !== 9 && !e.shiftKey) { $("#hdnRUC2").val(""); } });
+                        $("#txtRUC2").autocomplete({
+                            source: function( request, response ) {
+                                $.ajax({
+                                    url: "/evaluacion/empresaespecializadaautocompletar/", dataType: "json", data: { term: request.term },
+                                    success: function(data) { response($.map(data, function(item) { return { label: $.trim(item.descr_ctta), id: $.trim(item.num_ruc) }; })); }
+                                });
+                            }, minLength: 3, select: function(event, ui) { $("#hdnRUC2").val(ui.item.id); }
+                        });
+                        js_validarDMC(objs.fechainicio, objs.fechafin);
+                    }
+                });
+            },
+            <?php } ?>
+            <?php if(isset($this->perEsp[18])){ ?>
+            'eliminarcita':function(t){ idCita = t.id; $("#dialogEliminarCita").dialog("open"); },
+            <?php } ?>
+            <?php if(isset($this->perEsp[15])){ ?>
+            'iniciarcita':function(t){
+                idCita = t.id;
+                var motivo = $("#jqtblContenidoCita").jqGrid('getCell', idCita, 'hdnmotivo');
+                switch(Math.abs(motivo)){
+                    case 1: js_iniciarCita(1); break;
+                    case 2: js_iniciarCita(2); break;
+                    case 3: js_iniciarCita(3); break;
+                    case 4: js_iniciarCita(4); break;
+                    case 5: js_iniciarCita(5); break;
+                    case 6: $("#dialogDeclaracionJuradaPreguntar").dialog("open"); break;
+                    case 7: js_iniciarCita(7); break;
+                }
+            },
+            <?php } ?>
+            <?php if(isset($this->perEsp[21])){ ?>
+            'subirarchivos':function(t){
+                idCita = t.id;
+                var motivo = $("#jqtblContenidoCita").jqGrid('getCell', idCita, 'hdnmotivo');
+                $("#hdnIdMotivo").val(motivo);
+                $("#dialogSubirArchivos").dialog("open");                
+            },
+            <?php } ?>
+            <?php if(isset($this->perEsp[22])){ ?>
+            'imprimirexamen':function(t){
+                idCita = t.id;
+                idCita = idCita.split("_");
+                idCita = idCita[1];
+                $("#dialogImprimir").dialog("open");
+            },
+            'imprimiraudiometria':function(t){
+                idCita = t.id;
+                idCita = idCita.split("_");
+                idCita = idCita[1];
+                idMotivo = $("#jqtblContenidoCita").jqGrid('getCell', idCita, 'hdnmotivo');
+                $("#dialogAudiometria").dialog("open");
+            },
+            <?php } ?>
+            <?php if(isset($this->perEsp[19])){ ?>
+            'imprimircita':function(t){
+                idCita = t.id;
+                var motivo = $("#jqtblContenidoCita").jqGrid('getCell', idCita, 'hdnmotivo');
+                switch(Math.abs(motivo)){
+                    case 1: js_imprimirDocumentosIniciales(1); break;
+                    case 2: js_imprimirDocumentosIniciales(2); break;
+                    case 4: js_imprimirDocumentosIniciales(4); break;
+                    case 5: js_imprimirDocumentosIniciales(5); break;
+                    case 6: js_imprimirDocumentosIniciales(6); break;
+                }
+            },
+            <?php } ?>
+            <?php if(isset($this->perEsp[16])){ ?>
+            'cancelarcita':function(t){ idCita = t.id; $("#dialogCancelarCita").dialog("open"); }
+            <?php } ?>
+        },
+        onShowMenu: function(e, menu) {
+            var obj = $(e.target).parent().find("td[aria-describedby=jqtblContenidoCita_estado]").html();
+            var objs = $(e.target).parent().find("td[aria-describedby=jqtblContenidoCita_hdnmotivo]").html();
+            var pase1 = false;
+            var pase2 = false;
+            if(obj != "EN CURSO"){ $('#iniciarcita', menu).remove(); pase1 = true; }
+            if(obj != "EN ESPERA"){ $('#cancelarcita', menu).remove(); pase2 = true; }
+            if(pase1 && pase2){ $('#modificarcita', menu).remove(); $('#mh2', menu).remove(); }
+            if((obj == "ATENDIENDO" && objs != 3 && objs != 7) || (obj == "ATENDIDO" && objs == 6)){}else{ $('#imprimircita', menu).remove(); }
+            if(obj == "ATENDIENDO" || obj == "ATENDIDO"){
+                $('#iniciarcita', menu).remove();
+                $('#cancelarcita', menu).remove();
+                $('#modificarcita', menu).remove();
+            }else{ $('#subirarchivos', menu).remove(); }
+            if(obj != "ATENDIDO"){ $('#imprimirexamen', menu).remove(); $('#imprimiraudiometria', menu).remove(); }
+            return menu;
+        }
+    }
+    <?php if(isset($this->perEsp[14])){ ?>
+    function js_imprimirDocumentosIniciales(opc){
+        var aux = ""; if(opc == 6) aux = "&estado=5";
+        var obj = $("#divImpresionLinea");
+        $.ajax({ url: '/empleado/iniciarcita/', type: "POST", data: "imprimir=1&idCita=" + idCita + aux,
+            success: function(data) {
+                var x = data.split("||");
+                if(opc == 1 || opc == 4 || opc == 5){
+                    $("#spanFluxogramaAnualNombre").html(x[0]);
+                    obj.show(); $("#divFluxogramaAnual").show().printElement().hide(); obj.hide();
+                }else if(opc == 2){
+                    $("#spanFluxogramaEspecialNombre").html(x[0]);
+                    obj.show(); $("#divFluxogramaEspecial").show().printElement().hide(); obj.hide();
+                }else if(opc == 6){
+                    $("#spanDeclaracionNombre").html(x[0]);
+                    $("#spanDeclaracionDNI").html(x[1]);
+                    obj.show(); $("#divDeclaracionJurada").show().printElement().hide(); obj.hide();
+                }
+            }
+        });
+    }
+    <?php } ?>
+    <?php if(isset($this->perEsp[15])){ ?>
+    function js_iniciarCita(opc){
+        var aux = ""; if(opc == 6) aux = "&estado=5";
+        var obj = $("#divImpresionLinea");
+        $.ajax({
+            url: '/empleado/iniciarcita/',
+            type: "POST",
+            data: "idCita=" + idCita + aux,
+            success: function(data) {
+                var x = data.split("||");
+                if(opc == 1 || opc == 4 || opc == 5){
+                    $("#spanFluxogramaAnualNombre").html(x[0]);
+                    obj.show(); $("#divFluxogramaAnual").show().printElement().hide(); obj.hide();
+                }else if(opc == 2){
+                    $("#spanFluxogramaEspecialNombre").html(x[0]);
+                    obj.show(); $("#divFluxogramaEspecial").show().printElement().hide(); obj.hide();
+                }else if(opc == 6){
+                    $("#spanDeclaracionNombre").html(x[0]);
+                    $("#spanDeclaracionDNI").html(x[1]);
+                    obj.show(); $("#divDeclaracionJurada").show().printElement().hide(); obj.hide();
+                }
+                $("#jqtblContenidoCita").trigger("reloadGrid"); 
+            }
+        });
+    }
+    <?php } ?>
+    <?php if(isset($this->perEsp[14])){ ?>
+    function js_cita(){
+        $("#jqtblContenidoCita").setGridParam({'url': "/empleado/paginadocita/?idEmpleado="+idUsuario}).trigger("reloadGrid");
+    }
+    <?php } ?>
+    function js_reloadgrilla(){
+        $("#jqtblContenido").setGridParam({ 'url': "/empleado/paginado/?idCompania="+$("#selCompaniaUsuarioFiltro").val()+"&idLocalidad="+$("#selLocalidadUsuarioFiltro").val()+"&dni="+$("#txtDNIFiltro").val()+ "&apellidos="+$("#txtNombresFiltro").val() }).trigger("reloadGrid");
+    }
+    function js_mensajeGeneral(data){
+        var objs = jQuery.parseJSON(data);
+        var divMensaje = $("#divMensajeGeneral");
+        divMensaje.css("display","block");
+        divMensaje.css("padding","7px");
+        divMensaje.css("margin","0px");
+        divMensaje.html("");
+        divMensaje.html(objs.message);
+        setTimeout("js_mensajeGeneralOculta()", 3000);
+    }
+    function js_mensajeGeneralOculta(){ var divMensaje = $("#divMensajeGeneral"); divMensaje.css("display","none"); }
+    <?php if(isset($this->perEsp[17])){ ?>
+    function js_validarDMC(a,b){
+        $("#txtFechaCita2").datepicker({
+            defaultDate: "0",
+            changeMonth: true,
+            minDate: a,
+            maxDate: b,
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: "dd/mm/yy"
+        });
+        $("#txtArea2").autocomplete({
+            source: function( request, response ) {
+                $.ajax({ url: "/empleado/areaautocompletar/", dataType: "json", data: { term: request.term },
+                    success: function(data) { response($.map(data, function(item) { return { label: $.trim(item.descr_area), id: $.trim(item.id_area) }; })); }
+                });
+            }, minLength: 3, select: function(event, ui) { $("#hdnArea2").val(ui.item.id); }
+        });
+	$("#chkFlgTipoEmp2").click(function() {
+	if($(this).is(':checked')) {
+	$("#txtCentrocosto2").attr("class","validate[minSize[3]]");
+	} else {
+	$("#txtCentrocosto2").attr("class","validate[required,minSize[3]]");
+	}
+	});
+        $("#txtCentrocosto2").autocomplete({
+            source: function( request, response ) {
+                $.ajax({ url: "/empleado/centrocostoautocompletar/", dataType: "json", data: { term: request.term },
+                    success: function(data) {
+                        response($.map(data, function(item) { return { label: "("+$.trim(item.id_ccosto)+") "+$.trim(item.descr_ccosto), id: $.trim(item.id_ccosto) }; }));
+                    }
+                });
+            }, minLength: 3, select: function(event, ui) { $("#hdnCentrocosto2").val(ui.item.id); }
+        });
+        $("#frmModificarCita").validationEngine("attach");
+        $("#frmModificarCita").validationEngine("attach", {
+                onValidationComplete: function(form, status){
+                    if(status){
+                        var divMensaje = $("#frmModificarCita #divMensajeCita");
+                        divMensaje.html("&nbsp;");
+                        $.ajax({ url: '/empleado/modificarcita/', type: "POST", data: $("#frmModificarCita").serialize(),
+                            beforeSend:function(){
+                                $("#frmModificarCita").validationEngine("detach");
+                                divMensaje.html("<img src='/images/loading.gif' />");
+                            },
+                            success: function(data) {
+                                var objs = jQuery.parseJSON(data);
+                                if(objs.status == 1){
+                                    $("#jqtblContenidoCita").trigger("reloadGrid");
+                                    $("#dialogModificarCita").dialog("close");
+                                    divMensaje.html("&nbsp;");
+                                }else{
+                                    js_validarDMC(a, b);
+                                    divMensaje.attr("class", "txtCen error-text");
+                                    divMensaje.html(objs.message);
+                                }
+                            }
+                        });
+                    }
+                },
+                promptPosition : "topLeft", 
+                scroll: false,
+                autoHidePrompt: true,
+                autoHideDelay: 1000
+            }
+        );
+    }
+    <?php } ?>
+    <?php if(isset($this->perEsp[23])){ ?>
+    function js_validarDMU(){
+        $("#txtFechaNacimiento2").datepicker({ defaultDate: "0", changeMonth: true, maxDate: "-18Y", changeMonth: true, changeYear: true, dateFormat: "dd/mm/yy" });
+        $("#txtFechaIngreso2").datepicker({ defaultDate: "0", changeMonth: true, maxDate: "+3M", changeMonth: true, changeYear: true, dateFormat: "dd/mm/yy" });
+        $("#selDepartamento2").change(function(){
+            $.ajax({ url: '/ubigeo/listarprovincia/', type: "POST", data: "idDepartamento="+$("#selDepartamento2").val(),
+                beforeSend:function(){
+                    $(".divCargadorProvincia2").css("display","inline");
+                    $("#selProvincia2").attr("disabled", true);
+                    $("#selDistrito2").attr("disabled", true);
+                },
+                success: function(data) {
+                    var obj = $("#selDistrito2");
+                    obj.html("");
+                    obj.append('<option value="">Seleccione</option>');
+                    obj.attr("disabled", false);
+
+                    obj = $("#selProvincia2");
+                    obj.html("");
+                    obj.append('<option value="">Seleccione</option>');
+                    $.each(jQuery.parseJSON(data), function(i,row){ obj.append('<option value="'+i+'">'+row+'</option>'); });
+                    $(".divCargadorProvincia2").css("display","none");
+                    obj.attr("disabled", false);
+                }
+            }); 
+        });
+        $("#selProvincia2").change(function(){
+            $.ajax({ url: '/ubigeo/listardistrito/', type: "POST", data: "idDepartamento="+$("#selDepartamento2").val()+"&idProvincia="+$("#selProvincia2").val(),
+                beforeSend:function(){ $(".divCargadorDistrito2").css("display","inline"); $("#selDistrito2").attr("disabled", true); },
+                success: function(data) {
+                    var obj = $("#selDistrito2");
+                    obj.html("");
+                    obj.append('<option value="">Seleccione</option>');
+                    $.each(jQuery.parseJSON(data), function(i,row){ obj.append('<option value="'+i+'">'+row+'</option>'); });
+                    $(".divCargadorDistrito2").css("display","none");
+                    obj.attr("disabled", false);
+                }
+            }); 
+        });
+        $("#frmModificarUsuario").validationEngine("attach");
+        $("#frmModificarUsuario").validationEngine("attach", {
+                onValidationComplete: function(form, status){
+                    if(status){
+                        var divMensaje = $("#frmModificarUsuario #divMensaje");
+                        divMensaje.html("&nbsp;");
+                        $.ajax({ url: '/empleado/modificar/', type: "POST", data: $("#frmModificarUsuario").serialize(),
+                            beforeSend:function(){ $("#frmModificarUsuario").validationEngine("detach"); divMensaje.html("<img src='/images/loading.gif' />"); },
+                            success: function(data) {
+                                var objs = jQuery.parseJSON(data);
+                                if(objs.status == 1){
+                                    $("#jqtblContenido").trigger("reloadGrid");
+                                    $("#dialogModificarUsuario").dialog("close");
+                                    js_mensajeGeneral(data);
+                                    divMensaje.html("&nbsp;");
+                                }else{
+                                    js_validarDMU();
+                                    divMensaje.attr("class", "txtCen error-text");
+                                    divMensaje.html(objs.message);
+                                }
+                            }
+                        });
+                    }
+                },
+                promptPosition : "topLeft", 
+                scroll: false,
+                autoHidePrompt: true,
+                autoHideDelay: 1000
+            }
+        );
+    }
+    <?php } ?>
+    <?php if(isset($this->perEsp[13])){ ?>
+    function js_validarDNU(){
+        $("#txtArea").autocomplete({
+            source: function( request, response ) {
+                $.ajax({ url: "/empleado/areaautocompletar/", dataType: "json", data: { term: request.term },
+                    success: function(data) { response($.map(data, function(item) { return { label: $.trim(item.descr_area), id: $.trim(item.id_area) }; })); }
+                });
+            }, minLength: 3, select: function(event, ui) { $("#hdnArea").val(ui.item.id); }
+        });
+	$("#chkFlgTipoEmp").click(function() {  
+	if($(this).is(':checked')) { 
+	$("#txtCentrocosto").attr("class","validate[minSize[3]]");
+	} else {
+	$("#txtCentrocosto").attr("class","validate[required,minSize[3]]");
+	}  
+	});
+        $("#txtCentrocosto").autocomplete({
+            source: function( request, response ) {
+                $.ajax({ url: "/empleado/centrocostoautocompletar/", dataType: "json", data: { term: request.term },
+                    success: function(data) { response($.map(data, function(item) { return { label: "("+$.trim(item.id_ccosto)+") "+$.trim(item.descr_ccosto), id: $.trim(item.id_ccosto) }; })); }
+                });
+            }, minLength: 3, select: function(event, ui) { $("#hdnCentrocosto").val(ui.item.id); }
+        });
+        $("#frmNuevoUsuario").validationEngine("attach");
+        $("#frmNuevoUsuario").validationEngine("attach", {
+                onValidationComplete: function(form, status){
+                    if(status){
+                        var divMensaje = $("#frmNuevoUsuario #divMensaje");
+                        divMensaje.html("&nbsp;");
+                        $.ajax({ url: '/empleado/registrar/', type: "POST", data: $("#frmNuevoUsuario").serialize(),
+                            beforeSend:function(){
+                                $("#frmNuevoUsuario").validationEngine("detach");
+                                divMensaje.html("<img src='/images/loading.gif' />");
+                            },
+                            success: function(data) {
+                                var objs = $.parseJSON(data);
+                                if(objs.status == 1){
+                                    $("#jqtblContenido").trigger("reloadGrid");
+                                    $("#dialogNuevoUsuario").dialog("close");
+                                    js_mensajeGeneral(data);
+                                }else{
+                                    js_validarDNU();
+                                    divMensaje.attr("class", "txtCen error-text");
+                                    divMensaje.html(objs.message);
+                                }
+                            }
+                        });
+                    }
+                },
+                promptPosition : "topLeft", 
+                scroll: false,
+                autoHidePrompt: true,
+                autoHideDelay: 3000
+            }
+        );
+    }
+    <?php } ?>
+    <?php if(isset($this->perEsp[22])){ ?>
+    function js_validarDNC(){
+        $("#txtFechaCitaNC").datepicker({ defaultDate: "0", changeMonth: true, minDate: "0", maxDate: "+2M", dateFormat: "dd/mm/yy" });
+        $("#txtRUCNC").keydown(function(e){ if(e.which !== 9 && !e.shiftKey) { $("#hdnRUCNC").val(""); } });
+        $("#txtRUCNC").autocomplete({
+            source: function( request, response ) {
+                $.ajax({ url: "/evaluacion/empresaespecializadaautocompletar/", dataType: "json", data: { term: request.term },
+                    success: function(data) { response($.map(data, function(item) { return { label: $.trim(item.descr_ctta), id: $.trim(item.num_ruc) }; })); }
+                });
+            }, minLength: 3, select: function(event, ui) { $("#hdnRUCNC").val(ui.item.id); }
+        });
+        $("#txtAreaNC").autocomplete({
+            source: function( request, response ) {
+                $.ajax({ url: "/empleado/areaautocompletar/", dataType: "json", data: { term: request.term },
+                    success: function(data) { response($.map(data, function(item) { return { label: $.trim(item.descr_area), id: $.trim(item.id_area) }; })); }
+                });
+            }, minLength: 3, select: function(event, ui) { $("#hdnAreaNC").val(ui.item.id); }
+        });
+	$("#chkFlgTipoEmpNC").click(function() {
+	if($(this).is(':checked')) {
+	$("#txtCentrocostoNC").attr("class","validate[minSize[3]]");
+	} else {
+	$("#txtCentrocostoNC").attr("class","validate[required,minSize[3]]");
+	}
+	});
+        $("#txtCentrocostoNC").autocomplete({
+            source: function( request, response ) {
+                $.ajax({ url: "/empleado/centrocostoautocompletar/", dataType: "json", data: { term: request.term },
+                    success: function(data) { response($.map(data, function(item) { return { label: "("+$.trim(item.id_ccosto)+") "+$.trim(item.descr_ccosto), id: $.trim(item.id_ccosto) }; })); }
+                });
+            }, minLength: 3, select: function(event, ui) { $("#hdnCentrocostoNC").val(ui.item.id); }
+        });
+        $("#frmNuevaCita").validationEngine("attach");
+        $("#frmNuevaCita").validationEngine("attach", {
+                onValidationComplete: function(form, status){
+                    if(status){
+                        var divMensaje = $("#frmNuevaCita #divMensajeNC");
+                        divMensaje.html("&nbsp;");
+                        $.ajax({ url: '/empleado/registrarcita/', type: "POST", data: $("#frmNuevaCita").serialize(),
+                            beforeSend:function(){
+                                $("#frmNuevaCita").validationEngine("detach");
+                                divMensaje.html("<img src='/images/loading.gif' />");
+                            },
+                            success: function(data) {
+                                var objs = $.parseJSON(data);
+                                if(objs.status == 1){
+                                    $("#dialogNuevaCita").dialog("close");
+                                    js_mensajeGeneral(data);
+                                }else{
+                                    js_validarDNC();
+                                    divMensaje.attr("class", "txtCen error-text");
+                                    divMensaje.html(objs.message);
+                                }
+                            }
+                        });
+                    }
+                },
+                promptPosition : "topLeft", 
+                scroll: false,
+                autoHidePrompt: true,
+                autoHideDelay: 3000
+            }
+        );
+    }
+    <?php } ?>
+    
+    var idUsuario, idCita, idMotivo;
+    var msjCargando = "<div id='divCargadorPrincipal'><img src='/images/loading.gif' /><br>Cargando...</div>";
+    $("#selCompaniaUsuarioFiltro").change(function(){
+        $.ajax({ url: '/localidad/listar/', type: "POST", data: "selCompaniaUsuario="+$("#selCompaniaUsuarioFiltro").val(),
+            beforeSend:function(){
+                $(".divCargadorPequeno").css("display","inline");
+                $("#selLocalidadUsuarioFiltro").attr("disabled", true);
+            },
+            success: function(data) {
+                var obj = $("#selLocalidadUsuarioFiltro");
+                obj.html("");
+                obj.append('<option value="">Seleccione</option>');
+                $.each(jQuery.parseJSON(data), function(i,row){ obj.append('<option value="'+i+'">'+row+'</option>'); });
+                $(".divCargadorPequeno").css("display","none");
+                obj.attr("disabled", false);
+            }
+        }); 
+    });
+    $("#selLocalidadUsuarioFiltro").change(function(){ js_reloadgrilla(); });
+    $("#txtDNIFiltro, #txtNombresFiltro").keydown(function(tecla){ if(tecla.keyCode == 13) { js_reloadgrilla(); } });
+    $("#txtDNIFiltro").focus(function(){ $("#txtNombresFiltro").val(""); });
+    $("#txtNombresFiltro").focus(function(){ $("#txtDNIFiltro").val(""); });    
+    $("#btnActualizar").button({ icons: { primary: "ui-icon-refresh" } });
+    $("#btnActualizar").click(function(){  $("#txtNombresFiltro").val(""); $("#txtDNIFiltro").val(""); js_reloadgrilla();  });
+    $("#jqtblContenido").jqGrid({
+        url: "/empleado/paginado/?idCompania="+$("#selCompaniaUsuarioFiltro").val()+"&idLocalidad="+$("#selLocalidadUsuarioFiltro").val(),
+        datatype: "json", mtype: 'POST', height: 460, width: 'auto',
+        colNames:['idEmpleado','Apellido paterno','Apellido materno','Nombres','DNI','Fecha nacimiento','Puesto','Estado Civil','Sexo','Fecha ingreso'],
+        colModel:[
+                {name:'idEmpleado',     index:'idEmpleado',     hidden: true },
+                {name:'appaterno',      index:'appaterno',      width:170,  sortable:true, align:'center' },
+                {name:'apmaterno',      index:'apmaterno',      width:170,  sortable:true, align:'center' },
+                {name:'nombres',        index:'nombres',        width:173,  sortable:true, align:'center' },
+                {name:'dni',            index:'dni',            width:100,  sortable:true, align:'center' },
+                {name:'fechanacimiento',index:'fechanacimiento',width:100,  sortable:true, align:'center' },
+                {name:'deptnac',        index:'deptnac',        width:170,  sortable:true, align:'center' },
+                {name:'distnac',        index:'distnac',        width:130,  sortable:true, align:'center' },
+                {name:'sexo',           index:'sexo',           width:130,  sortable:true, align:'center' },
+                {name:'fechaingreso',   index:'fechaingreso',   width:100,   sortable:true, align:'center' }
+        ],
+        gridComplete: function() {
+            var registros = $("#jqtblContenido").getRowData();
+            var c = 0;
+            var id = "";
+            while(c < registros.length){
+                id = registros[c].idEmpleado;
+                $("#"+id).contextMenu('MenuJqGrid',eventsMenu);
+                c++;
+            }
+        },
+        afterInsertRow: function(rowid, aData, rowelem) {
+            if ($("#selUsuarios").val() == 2) { $('tr#'+rowid).children("td.sgcollapsed").html("").removeClass('ui-sgcollapsed sgcollapsed'); }
+        },
+        rownumbers: true, rowNum:20, rowList:[10,20,30,50,100,500,1000],
+   	pager: '#jqdivPaginado', sortname: 'appaterno', viewrecords: true, sortorder: "asc"
+    });
+    $("#jqtblContenido").jqGrid('navGrid','#jqdivPaginado',{edit:false,add:false,del:false,search:false});
+    <?php if(isset($this->perEsp[14])){ ?>
+    $("#jqtblContenidoCita").jqGrid({
+        url: "/empleado/paginadocita/?idEmpleado="+idUsuario,
+        datatype: "json", mtype: 'POST', height: 390, width: 'auto',
+        colNames:['idCita','Fecha','hdnmotivo','Motivo','Teléfono','Estado Civil', 'Estado', 'Empresa'],
+        colModel:[
+                {name:'idCita',                 index:'idCita',                 hidden: true },
+                {name:'fecha',                  index:'fecha',                  width:100,  sortable:true, align:'center' },
+                {name:'hdnmotivo',              index:'hdnmotivo',              hidden: true },
+                {name:'motivo',                 index:'motivo',                 width:150,  sortable:true, align:'center' },
+                {name:'telefono',               index:'telefono',               width:100,  sortable:true, align:'center' },
+                {name:'estadocivil',            index:'estadocivil',            width:100,  sortable:true, align:'center' },
+                {name:'estado',                 index:'estado',                 width:100,  sortable:true, align:'center' },
+                {name:'rucempresaespecializada',index:'rucempresaespecializada',width:365,  sortable:true, align:'center' }
+        ],
+        gridComplete: function() {
+            var obj = $("#jqtblContenidoCita");
+            var registros = obj.getRowData();
+            var ids = obj.jqGrid("getDataIDs");
+            var c = 0;
+            var id = "";
+            while(c < registros.length){
+                id = registros[c].idCita;
+                $("#"+id).contextMenu('MenuJqGridCita',eventsMenuCita);
+                switch(obj.jqGrid('getCell', ids[c], 'estado')){
+                    case "EN ESPERA": obj.jqGrid('setCell',ids[c],'estado',"",{color:'#848485'}); break;
+                    case "EN CURSO": obj.jqGrid('setCell',ids[c],'estado',"",{color:'#F6B724'}); break;
+                    case "CANCELADO": obj.jqGrid('setCell',ids[c],'estado',"",{color:'#CC0000'}); break;
+                    case "NO SE PRESENTÓ": obj.jqGrid('setCell',ids[c],'estado',"",{color:'#CCCCCC'}); break;
+                    case "ATENDIDO": obj.jqGrid('setCell',ids[c],'estado',"",{color:'#B2CC3E'}); break;
+                    case "ATENDIENDO": obj.jqGrid('setCell',ids[c],'estado',"",{color:'#0099CC'}); break;
+                }
+                c++;
+            }
+        },
+        rownumbers: true, rowNum:20, rowList:[10,20,30,50,100,500,1000], pager: '#jqdivPaginadoCita',
+   	sortname: 'fecha', viewrecords: true, sortorder: "desc"
+    });
+    $("#jqtblContenidoCita").jqGrid('navGrid','#jqdivPaginadoCita',{edit:false,add:false,del:false,search:false});
+    <?php } ?>
+});
+</script>

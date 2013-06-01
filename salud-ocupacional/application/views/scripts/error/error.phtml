@@ -1,0 +1,37 @@
+<div id="loginContenedor">
+    <div id="loginContenido">
+        <img src="/images/logobuenaventura.jpg" style="padding-left: 180px" />
+        <br /><br />
+        <div class="error-text" id="divMensaje">&nbsp;</div>
+        <form method="post" name="frmLogin" id="frmLogin">
+            <table id="tblLogin" width="100%">
+                <tr>
+                    <td class="txtCen" width="100%">
+                        <span style="font-size: 14px; line-height: 25px;"><br />
+                        Ha ocurrido un error intente recargar la página nuevamente o vaya a la página principal haciendo clic <a href="/" id="aNoticias" class="aEnlace aResaltado">aquí</a>.
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        </form>
+        <!--
+        <h1>An error occurred</h1>
+        <h2><?php echo $this->message ?></h2>
+
+        <?php if (isset($this->exception)): ?>
+
+        <h3>Exception information:</h3>
+        <p>
+            <b>Message:</b> <?php echo $this->exception->getMessage() ?>
+        </p>
+
+        <h3>Stack trace:</h3>
+        <pre><?php echo $this->exception->getTraceAsString() ?>
+        </pre>
+
+        <h3>Request Parameters:</h3>
+        <pre><?php echo $this->escape(var_export($this->request->getParams(), true)) ?>
+        </pre>
+        <?php endif ?>-->
+    </div>   
+</div>

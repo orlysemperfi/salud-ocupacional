@@ -1,0 +1,158 @@
+<div id="divBarraTitulo">
+    Módulo de Reportes
+</div>
+<div id="divBarraHerramientas">
+    <form name="frmFiltro" id="frmFiltro" method="post"> 
+        <select id="selCompaniaUsuarioFiltro" name="selCompaniaUsuarioFiltro" style="font-size: 9px">
+            <?php
+            foreach ($this->rstListarCompania as $row) {
+                if ($row["idCompania"] == $this->idCompania) {
+                    echo '<option value="' . $row["idCompania"] . '">' . $row["nombre"] . '</option>';
+                    break;
+                }
+            }
+            foreach ($this->rstListarCompania as $row) {
+                if ($row["idCompania"] != $this->idCompania) {
+                    echo '<option value="' . $row["idCompania"] . '">' . $row["nombre"] . '</option>';
+                }
+            }
+            ?>
+        </select>
+        <select id="selLocalidadUsuarioFiltro" name="selLocalidadUsuarioFiltro" style="font-size: 9px; width: 130px">
+            <?php
+            foreach ($this->rstListarLocalidad as $row) {
+                if ($row["idLocalidad"] == $this->idLocalidad) {
+                    echo '<option value="' . $row["idLocalidad"] . '">' . $row["nombre"] . '</option>';
+                    break;
+                }
+            }
+            foreach ($this->rstListarLocalidad as $row) {
+                if ($row["idLocalidad"] != $this->idLocalidad) {
+                    echo '<option value="' . $row["idLocalidad"] . '">' . $row["nombre"] . '</option>';
+                }
+            }
+            ?>
+        </select>
+        <div class="divCargadorPequeno" style="display:none"> <img src="/images/cargando.gif" /></div>
+        | 
+        <select id="selMotivo" name="selMotivo" style="font-size: 9px; width: 115px">
+            <option value="0">MOTIVO EXAMEN</option>
+            <option value="1">ANUAL</option>
+            <option value="2">EQUIPOS PESADOS</option>
+            <option value="3">TRABAJO EN ALTURA</option>
+            <option value="4">RETIRO</option>
+            <option value="5">INGRESO</option>
+            <option value="6">RETORNO DE VACACIONES</option>
+            <option value="7">VISITA</option>
+        </select>
+        | 
+        <select id="selEstadoCita" name="selEstadoCita" style="font-size: 9px">
+            <option value="0">ESTADO DE CITA</option>
+            <option value="1">EN ESPERA</option>
+            <option value="2">EN CURSO</option>
+            <option value="3">CANCELADO</option>
+            <option value="4">NO SE PRESENTÓ</option>
+            <option value="5">ATENDIDO</option>
+            <option value="6">ATENDIENDO</option>
+        </select>
+        | 
+        <select id="selEstadoExamen" name="selEstadoExamen" style="font-size: 9px">
+            <option value="0">APTO Y NO APTO</option>
+            <option value="1">SOLO APTO</option>
+            <option value="2">SOLO NO APTO</option>
+        </select>
+        | 
+        <input type="hidden" id="hdnEmpresaEspecializada" name="hdnEmpresaEspecializada" />
+        <input type="text" style="width: 130px !Important;" id="txtEmpresaEspecializada" name="txtEmpresaEspecializada" class="validate[required]" placeholder="Por empresa especializada" />
+        <input type="hidden" id="hdnEnfermedad" name="hdnEnfermedad" disabled="disabled" />
+        <input type="text" style="width: 130px !Important;" id="txtEnfermedad" disabled="disabled" name="txtEnfermedad" class="validate[required]" placeholder="Por enfermedad ocupacional" />
+        | 
+        <input type="text" style="width: 55px !Important;" id="txtFechaInicio" name="txtFechaInicio" class="validate[required, custom[date]] datepicker" value="<?php echo date("d/m/Y", strtotime ( '-15 day' , strtotime ( date("Y-m-d") ) ));?>" placeholder="Desde fecha" />
+        <input type="text" style="width: 55px !Important;" id="txtFechaFin" name="txtFechaFin" class="validate[required, custom[date]] datepicker" value="<?php echo date("d/m/Y");?>" placeholder="Hasta fecha" />
+        | 
+        <button name="btnActualizar" id="btnActualizar" type="button">VER</button>
+        <button name="btnActualizars" id="btnActualizars" type="button">EXPORTAR EXCEL</button>
+    </form>
+</div>
+<div id="divGrilla" style="width: 100%; height: 500px; background-color: #FFF; border: solid 1px #F0F0F0">
+    <iframe id='ifpdf' src='/reporte/generapdf/' style='background-color:transparent;' wmode="transparent"
+            allowtransparency='true' bgcolor="transparent" frameborder='0' width='100%' height='500'></iframe>
+</div>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#btnActualizar").button({ icons: { primary: "ui-icon-refresh" } }).click(function(){ 
+            $("#divGrilla").prepend("<div class='pdfcargando' style='width:100%; height:500px;margin: 220px 0px 0px 600px'><img src='/images/cargando.gif' /> Cargando...</div>");
+            $("#ifpdf").attr("src", "/reporte/generapdf/?"+$("#frmFiltro").serialize());
+            var asignar = setInterval(function(){
+                if(document.getElementById('ifpdf')){
+                    if(window.ActiveXObject){
+                        document.getElementById('ifpdf').onreadystatechange=function(){
+                            if(document.getElementById('ifpdf').readyState=='complete'){
+                                $(".pdfcargando").remove();
+                            }
+                        }
+                        clearInterval(asignar);
+                        return;
+                    }
+                    document.getElementById('ifpdf').onload = function(){
+                        $(".pdfcargando").remove();
+                    }
+                    clearInterval(asignar);
+                }
+            },10);
+        });
+        $("#btnActualizars").button({ icons: { primary: "ui-icon-arrowthickstop-1-s" } }).click(function(){ 
+            $(location).attr("href", "/reporte/generapdf/?opc=des&"+$("#frmFiltro").serialize());
+        });
+        $("#selMotivo").change(function(){ var obj = $(this).val(); 
+            if(obj != 1 && obj != 4 && obj != 5){ 
+                $("#hdnEnfermedad").val("").attr("disabled", true); 
+                $("#txtEnfermedad").val("").attr("disabled", true); ; 
+            }else{
+                $("#hdnEnfermedad").val("").attr("disabled", false); ; 
+                $("#txtEnfermedad").val("").attr("disabled", false); ; 
+            }
+        });
+        $("#selCompaniaUsuarioFiltro").change(function(){
+            $.ajax({ url: '/localidad/listar/', type: "POST", data: "selCompaniaUsuario="+$("#selCompaniaUsuarioFiltro").val(),
+                beforeSend:function(){ $(".divCargadorPequeno").css("display","inline"); $("#selLocalidadUsuarioFiltro").attr("disabled", true); }, 
+                success: function(data) {
+                    var obj = $("#selLocalidadUsuarioFiltro");
+                    obj.html("").append('<option value="">Seleccione</option>');
+                    $.each($.parseJSON(data), function(i,row){ obj.append('<option value="'+i+'">'+row+'</option>'); });
+                    $(".divCargadorPequeno").css("display","none");
+                    obj.attr("disabled", false);
+                }
+            }); 
+        });
+        var empresa = "", enfermedad = "";
+        $("#txtEmpresaEspecializada").mouseup(function(e){ e.preventDefault(); }).keyup(function(){
+            if(empresa != "") if($(this).val() != empresa){ $("#hdnEmpresaEspecializada").val(""); $(this).val(""); empresa = "" }
+        }).focus(function(){ $(this).select(); }).autocomplete({
+            source: function( request, response ) {
+                $.ajax({
+                    url: "/evaluacion/empresaespecializadaautocompletar/", dataType: "json", data: { term: request.term },
+                    success: function(data) { response($.map(data, function(item) { return { label: $.trim(item.descr_ctta), id: $.trim(item.num_ruc) }; })); }
+                });
+            }, minLength: 5, select: function(event, ui) { $("#hdnEmpresaEspecializada").val(ui.item.id); empresa = ui.item.label; }
+        });
+        $("#txtEnfermedad").mouseup(function(e){ e.preventDefault(); }).keyup(function(){
+            if(enfermedad != "") if($(this).val() != enfermedad){ $("#hdnEnfermedad").val(""); $(this).val(""); enfermedad = "" }
+        }).focus(function(){ $(this).select(); }).autocomplete({
+            source: function( request, response ) {
+                $.ajax({
+                    url: "/evaluacion/enfermedadesautocompletar/", dataType: "json", data: { term: request.term },
+                    success: function(data) { response($.map(data, function(item) { return { label: $.trim(item.nombre)+" ("+item.idObservaciones+")", id: item.idObservaciones }; })); }
+                });
+            }, minLength: 5, select: function( event, ui ) { $("#hdnEnfermedad").val(ui.item.id); enfermedad = ui.item.label; }
+        });
+        $("#txtFechaInicio").datepicker({
+            defaultDate: "0", changeMonth: true, dateFormat: "dd/mm/yy", numberOfMonths: 1,
+            onSelect: function( selectedDate ) { $( "#txtFechaFin" ).datepicker( "option", "minDate", selectedDate ); }
+        });
+        $("#txtFechaFin").datepicker({
+            defaultDate: "+2W", changeMonth: true, dateFormat: "dd/mm/yy", numberOfMonths: 1,
+            onSelect: function( selectedDate ) { $( "#txtFechaInicio" ).datepicker( "option", "maxDate", selectedDate ) }
+        });
+    });
+</script>
