@@ -1,0 +1,486 @@
+<div id="divBarraTitulo">
+    Módulo de Cronogramas
+</div>
+<div id="divBarraHerramientas">
+    <div class="divIzquierda" style="width: 80% !important">
+        <select id="selCompaniaUsuario" name="selCompaniaUsuario">
+            <?php
+            foreach($this->rstListarCompania as $row){
+                if($row["idCompania"] == $this->idCompania){
+                    echo '<option value="'.$row["idCompania"].'">'.$row["nombre"].'</option>';
+                    break;
+                }
+            }
+            foreach($this->rstListarCompania as $row){
+                if($row["idCompania"] != $this->idCompania){
+                    echo '<option value="'.$row["idCompania"].'">'.$row["nombre"].'</option>';
+                }
+            }
+            ?>
+        </select>
+        <select id="selLocalidadUsuario" name="selLocalidadUsuario">
+            <?php
+            foreach($this->rstListarLocalidad as $row){
+                if($row["idLocalidad"] == $this->idLocalidad){
+                    echo '<option value="'.$row["idLocalidad"].'">'.$row["nombre"].'</option>';
+                    break;
+                }
+            }
+            foreach($this->rstListarLocalidad as $row){
+                if($row["idLocalidad"] != $this->idLocalidad){
+                    echo '<option value="'.$row["idLocalidad"].'">'.$row["nombre"].'</option>';
+                }
+            }
+            ?>
+        </select>
+        <div class="divCargadorPequeno" style="display:none"> <img src="/images/cargando.gif" /></div>
+         | 
+        <select id="selMotivo" name="selMotivo">
+            <option value="">SELECCIONE MOTIVO</option>
+            <option value="1">ANUAL</option>
+            <option value="2">EQUIPOS PESADOS</option>
+            <option value="3">TRABAJO EN ALTURA</option>
+            <option value="4">RETIRO</option>
+            <option value="5">INGRESO</option>
+            <option value="6">RETORNO DE VACACIONES</option>
+        </select>
+         | 
+        <select id="selEstado" name="selEstado">
+            <option value="">SELECCIONE ESTADO</option>
+            <option value="1">PENDIENTE APROBACIÓN</option>
+            <option value="2">EN ESPERA (APROBADO)</option>
+            <option value="3">EN CURSO</option>
+            <option value="5">CERRADO</option>
+        </select>
+         | 
+        <input type="text" id="txtFechaInicio" name="txtFechaInicio" readonly class="validate[required] datepicker" placeholder="Desde fecha" />
+        <input type="text" id="txtFechaFin" name="txtFechaFin" readonly class="validate[required] datepicker" placeholder="Hasta fecha" />
+         | 
+        <?php if(isset($this->perEsp[26])){ ?><button name="btnNuevo" id="btnNuevo">Generar Cronograma</button><?php } ?>
+        <button name="btnActualizar" id="btnActualizar">Actualizar</button>
+    </div>
+    <div class="divDerecha" style="width: 20% !important">
+        <div id="divMensajeGeneral" class="divDialogTitulo ui-state-highlight ui-corner-all oculto">
+        </div>
+    </div>
+</div>
+<div id="divGrilla">
+    <table id="jqtblContenido"></table>
+    <div id="jqdivPaginado"></div>
+</div>
+<?php if(isset($this->perEsp[27]) || isset($this->perEsp[28]) || isset($this->perEsp[29]) || isset($this->perEsp[30])){ ?>
+<div class="contextMenu" id="MenuJqGrid">
+    <ul>
+        <?php if(isset($this->perEsp[27])){ ?><li id="ver">Modificar / Ver cronograma</li><?php } ?>
+        <?php if(isset($this->perEsp[28])){ ?><li id="enviar">Enviar a email</li><?php } ?>
+        <?php if(isset($this->perEsp[27]) || isset($this->perEsp[28])){ ?><li id="mh1" class="divLineaContextmenu"></li><?php } ?>
+        <?php if(isset($this->perEsp[29])){ ?><li id="estado">Aprobar / Pendiente</li><?php } ?>
+        <?php if(isset($this->perEsp[29]) && isset($this->perEsp[30])){ ?><li id="mh2" class="divLineaContextmenu"></li><?php } ?>
+        <?php if(isset($this->perEsp[30])){ ?><li id="eliminar">Eliminar</li><?php } ?>
+    </ul>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[30])){ ?>
+<div id="dialogEliminarCronograma" title="Eliminar Cronograma" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        ¿Está seguro de eliminar este registro?
+    </div>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[27])){ ?>
+<div id="dialogCronograma" title="Cronograma" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Podrá modificar este cronograma sólo si aún está pendiente de aprobación.
+    </div>
+    <div id="divDialogContenido">
+        <div id="calendarCronograma" style="margin-top: 10px"></div>
+    </div>
+</div>
+<div id="dialogAviso" title="Aviso" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+    </div>
+</div>
+<?php } ?>
+<?php if(isset($this->perEsp[28])){ ?>
+<div id="dialogCorreos" title="Correos a notificar" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Ingrese los correos a los que se debe notificar separados por una coma ( , ).
+    </div>
+    <div id="divDialogContenido">
+        <form name="frmCorreos" id="frmCorreos" method="post"> 
+            <input type="hidden" name="hdnId" id="hdnIdCorreo" />
+            <textarea id="txtCorreos" name="txtCorreos" class="validate[funcCall[validateEmail]]" 
+                      style="width: 330px; height: 50px"></textarea>            
+        </form>
+    </div>
+</div>
+<?php } ?>
+<script type="text/javascript">
+$(document).ready(function(){
+    <?php if(isset($this->perEsp[28])){ ?>
+    $("#dialogCorreos").dialog({ autoOpen: false, height: 250, width: 370, modal: true, resizable: false,
+        open: function(){ 
+            $("#hdnIdCorreo").val(idCronograma);
+            $.ajax({ url: "/cronograma/obtenercorreos/", type: "POST",
+                data: "selCompaniaUsuario="+$("#selCompaniaUsuario").val()+"&selLocalidadUsuario="+$("#selLocalidadUsuario").val(),
+                success: function(data) { $("#txtCorreos").val(data); }
+            });
+        }, buttons:{  "Enviar cronograma": function(){  $("#frmCorreos").submit(); }  }
+    });
+    $("#frmCorreos").validationEngine("attach", {
+        onValidationComplete: function(form, status){
+            if(status){
+                $.ajax({ url: "/cronograma/enviarcronogramaparavalidar/", type: "POST", data: $("#frmCorreos").serialize(),
+                    beforeSend:function(){ $("#dialogAviso").dialog("open"); $("#dialogAviso .divDialogTitulo").html("Enviando cronograma."); },
+                    success: function(data) {
+                        js_mensajeGeneral(data);
+                        $("#dialogAviso").dialog("close");
+                        $("#dialogCorreos").dialog("close");
+                    }
+                });
+            }
+        }, promptPosition : "topLeft",  scroll: false, autoHidePrompt: true, autoHideDelay: 3000
+    });
+    <?php } ?>
+    <?php if(isset($this->perEsp[27])){ ?>
+    $("#dialogCronograma").dialog({
+        closeOnEscape: false, autoOpen: false, height: 600, width: 1330, modal: true, resizable: false,
+        open: function(){ js_rendercalendarioCronograma(); },
+        buttons:{ 
+            "Modificar cronograma": function(){
+                $.ajax({ url: "/cronograma/cronogramaactualizar/", type: "POST", data: $("#frmCorreos").serialize(),
+                    beforeSend:function(){ $("#dialogAviso").dialog("open"); $("#dialogAviso .divDialogTitulo").html("Actualizando cronograma."); },
+                    success: function(data) {
+                        js_actualizar();
+                        $("#dialogCronograma").dialog("close");
+                        $("#dialogAviso").dialog("close");
+                    }
+                });
+            }, "Cerrar": function(){ $(this).dialog("close"); } 
+        }
+    });
+    <?php } ?>
+    <?php if(isset($this->perEsp[30])){ ?>
+    $("#dialogEliminarCronograma").dialog({
+        closeOnEscape: false, autoOpen: false, height: 160, width: 370, modal: true, resizable: false,
+        buttons:{
+            "Sí": function(){ 
+                $.ajax({ url: '/cronograma/eliminar/', type: "POST", data: "idCronograma=" + idCronograma,
+                    success: function(data) {
+                        $("#jqtblContenido").trigger("reloadGrid");
+                        js_mensajeGeneral(data);
+                        $("#dialogEliminarCronograma").dialog("close");
+                    }
+                });
+            }, "No": function(){ $(this).dialog("close"); }
+        }
+    });
+    <?php } ?>
+    $("#dialogAviso").dialog({
+        autoOpen: false, height: 120, width: 250, modal: true, resizable: false,
+        open: function(){ $("#dialogAviso .divDialogTitulo").html(""); }
+    });
+    <?php if(isset($this->perEsp[26])){ ?>
+    $("#btnNuevo").button({ icons: { primary: "ui-icon-plus" } });
+    $("#btnNuevo").click(function(){  $(location).attr("href","/cronograma/nuevo/");  });      
+    <?php } ?>
+    $("#btnActualizar").button({ icons: { primary: "ui-icon-refresh" } });
+    $("#btnActualizar").click(function(){  js_actualizar(); });
+    $("#selMotivo").change(function(){ $("#txtFechaInicio").val(""); $("#txtFechaFin").val(""); $("#selEstado").val(0); js_reloadgrilla(); });
+    $("#selEstado").change(function(){ $("#txtFechaInicio").val(""); $("#txtFechaFin").val(""); $("#selMotivo").val(0); js_reloadgrilla(); });
+    $("#selLocalidadUsuario").change(function(){ js_reloadgrilla(); });
+    $("#selCompaniaUsuario").change(function(){
+        $.ajax({ url: '/localidad/listar/', type: "POST", data: "selCompaniaUsuario="+$("#selCompaniaUsuario").val(),
+            beforeSend:function(){ $(".divCargadorPequeno").css("display","inline"); $("#selLocalidadUsuario").attr("disabled", true); },
+            success: function(data) {
+                var obj = $("#selLocalidadUsuario");
+                obj.html("");
+                obj.append('<option value="">Seleccione</option>');
+                $.each(jQuery.parseJSON(data), function(i,row){ obj.append('<option value="'+i+'">'+row+'</option>'); });
+                $(".divCargadorPequeno").css("display","none");
+                obj.attr("disabled", false);
+            }
+        }); 
+    });
+    $("#txtFechaInicio").datepicker({
+        defaultDate: "0", changeMonth: true, dateFormat: "dd/mm/yy", numberOfMonths: 2,
+        onSelect: function( selectedDate ) {
+            $( "#txtFechaFin" ).datepicker( "option", "minDate", selectedDate );
+            $( "#txtFechaFin" ).attr("disabled", false);
+            if($("#txtFechaFin").val() != "") js_reloadgrilla();
+            $("#selMotivo").val(0);
+            $("#selEstado").val(0);
+        }
+    });
+    $("#txtFechaFin").datepicker({
+        defaultDate: "+1w", changeMonth: true, dateFormat: "dd/mm/yy", numberOfMonths: 2,
+        onSelect: function( selectedDate ) {
+            $( "#txtFechaInicio" ).datepicker( "option", "maxDate", selectedDate )
+            if($("#txtFechaInicio").val() != "") js_reloadgrilla();
+            $("#selMotivo").val(0);
+            $("#selEstado").val(0);
+        }
+    });
+    
+    $("#jqtblContenido").jqGrid({
+        url: "/cronograma/listar/?idCompania="+$("#selCompaniaUsuario").val()+ "&idLocalidad="+$("#selLocalidadUsuario").val()+
+            "&fechainicio="+$("#txtFechaInicio").val()+ "&fechafin="+$("#txtFechaFin").val()+ "&motivo="+$("#selMotivo").val()+ "&estado="+$("#selEstado").val(),
+        datatype: "json", mtype: 'POST', height: 460, width: 'auto', shrinkToFit: true,
+        colNames:['idCronograma','Fecha Inicio','Fecha Fin','Motivo','Nro Citas', 'idEstado', 'Estado', 
+                  'En espera','En curso','Cancelado','No se presentó','Atendidos',  '% Completado'],
+        colModel:[
+                {name:'idCronograma',   index:'idCronograma',   hidden: true },
+                {name:'fechainicio',    index:'fechainicio',    width:110,  sortable:true, align:'center' },
+                {name:'fechafin',       index:'fechafin',       width:110,  sortable:true, align:'center' },
+                {name:'motivo',         index:'motivo',         width:193,  sortable:true, align:'center' },
+                {name:'nrocitas',       index:'nrocitas',       width:70,  sortable:true, align:'center' },
+                {name:'idEstado',       index:'idEstado',       hidden: true },
+                {name:'estado',         index:'estado',         width:160,  sortable:true, align:'center' },
+                
+                {name:'nroespera',      index:'nroespera',      width:100,  sortable:true, align:'center' },
+                {name:'nrocurso',       index:'nrocurso',       width:100,  sortable:true, align:'center' },
+                {name:'nrocancelado',   index:'nrocancelado',   width:100,  sortable:true, align:'center' },
+                {name:'nronopresento',  index:'nronopresento',  width:100,  sortable:true, align:'center' },
+                {name:'nrocerrado',     index:'nrocerrado',     width:100,  sortable:true, align:'center' },
+                
+                {name:'porcompleto',    index:'porcompleto',    width:100,  sortable:true, align:'center' }
+        ],
+        gridComplete: function() {
+            var registros = $("#jqtblContenido").getRowData();
+            var ids = $("#jqtblContenido").jqGrid("getDataIDs");
+            var c = 0;
+            var total = 0;
+            var parcial = 0;
+            var porc = 0;
+            var id = "";
+            while(c < registros.length){
+                id = registros[c].idCronograma;
+                $("#"+id).contextMenu('MenuJqGrid',eventsMenu);
+                total = $("#jqtblContenido").jqGrid('getCell', ids[c], 'nrocitas');
+                parcial = $("#jqtblContenido").jqGrid('getCell', ids[c], 'porcompleto');
+                porc = ((100 * parcial)/total).toFixed(0);
+                $("#jqtblContenido").jqGrid('setCell',ids[c],'porcompleto',porc + ".00%");
+                switch($("#jqtblContenido").jqGrid('getCell', ids[c], 'estado')){
+                    case "PENDIENTE APROBACIÓN": $("#jqtblContenido").jqGrid('setCell',ids[c],'estado',"",{color:'#CCCCCC'}); break;
+                    case "EN ESPERA (APROBADO)": $("#jqtblContenido").jqGrid('setCell',ids[c],'estado',"",{color:'#848485'}); break;
+                    case "EN CURSO": $("#jqtblContenido").jqGrid('setCell',ids[c],'estado',"",{color:'#F6B724'}); break;
+                    case "SIN APROBAR": $("#jqtblContenido").jqGrid('setCell',ids[c],'estado',"",{color:'#CC0000'}); break;
+                    case "CERRADO": $("#jqtblContenido").jqGrid('setCell',ids[c],'estado',"",{color:'#B2CC3E'}); break;
+                }
+                c++;
+            }
+        },
+        afterInsertRow: function(rowid, aData, rowelem) { if ($("#selUsuarios").val() == 2) { $('tr#'+rowid).children("td.sgcollapsed").html("").removeClass('ui-sgcollapsed sgcollapsed'); } },
+        rowNum:2000, rowTotal: 10000, rownumbers: true, loadonce: false, ignoreCase: true, gridview: false, pager: '#jqdivPaginado', viewrecords: true, sortname: 'variable', sortorder: "asc"
+    });
+    eventsMenu = {
+        bindings:{
+            <?php if(isset($this->perEsp[26])){ ?>
+            'ver':function(t){
+                idCronograma = t.id;
+                auxhdnfechainicio = $("#jqtblContenido").jqGrid('getCell', idCronograma, 'fechainicio');
+                auxhdnfechafin = $("#jqtblContenido").jqGrid('getCell', idCronograma, 'fechafin');                
+                auxestado = $("#jqtblContenido").jqGrid('getCell', idCronograma, 'idEstado');                
+                $.ajax({ url: '/cronograma/reglaobtenerdb/', type: "POST", data: "idCronograma=" + idCronograma,
+                    success: function(data) {
+                        fechaG = new Array();
+                        var c = 0;
+                        $.each($.parseJSON(data),function(indice,valor) {
+                            var fech1 = new Date(valor.start + " 00:00:00");
+                            var fech2 = new Date(valor.end + " 00:00:00");
+                            fechaG[c] = new Array(fech1, fech2);
+                            c++;
+                        });                        
+                        $("#dialogCronograma").dialog("open");
+                    }
+                });
+            },
+            <?php } ?>
+            <?php if(isset($this->perEsp[28])){ ?>
+            'enviar':function(t){ idCronograma = t.id; $("#dialogCorreos").dialog("open"); },
+            <?php } ?>
+            <?php if(isset($this->perEsp[29])){ ?>
+            'estado':function(t){
+                var id = t.id;
+                $.ajax({ url: '/cronograma/activar/', type: "POST", data: "idCronograma=" + id,
+                    success: function(data) { $("#jqtblContenido").trigger("reloadGrid"); js_mensajeGeneral(data); }
+                });
+            },
+            <?php } ?>
+            <?php if(isset($this->perEsp[30])){ ?>
+            'eliminar':function(t){ idCronograma = t.id; $("#dialogEliminarCronograma").dialog("open"); }
+            <?php } ?>
+        },
+        onShowMenu: function(e, menu) {
+            var x = $("#jqtblContenido").jqGrid('getCell', $(e.target).parent().attr("id"), 'idEstado');
+            if(x != 1 && x != 2){
+                $('#estado', menu).remove();
+                $('#mh2', menu).remove();
+                return menu;
+            }else{
+                return menu;
+            }
+        }
+    }
+    var fechaG = new Array();
+    var idCronograma = 0;
+    var auxhdnfechainicio = "";
+    var auxhdnfechafin = "";
+    var auxestado = 0;
+    var msjCargando = "<div id='divCargadorPrincipal'><img src='/images/loading.gif' /><br>Cargando...</div>";
+    function fecha(cadena) {  
+       var separador = "/";
+       if ( cadena.indexOf( separador ) != -1 ) {  
+            var posi1 = 0  
+            var posi2 = cadena.indexOf( separador, posi1 + 1 )  
+            var posi3 = cadena.indexOf( separador, posi2 + 1 )  
+            this.dia = cadena.substring( posi1, posi2 )  
+            this.mes = cadena.substring( posi2 + 1, posi3 )  
+            this.anio = cadena.substring( posi3 + 1, cadena.length )  
+       } else {  
+            this.dia = 0  
+            this.mes = 0  
+            this.anio = 0     
+       }  
+    } 
+    function js_mensajeGeneral(data){
+        var objs = jQuery.parseJSON(data);
+        var divMensaje = $("#divMensajeGeneral");
+        divMensaje.css("display","block");
+        divMensaje.css("padding","7px");
+        divMensaje.css("margin","0px");
+        divMensaje.html("");
+        divMensaje.html(objs.message);
+        setTimeout("js_mensajeGeneralOculta()", 3000);
+    }
+    function js_mensajeGeneralOculta(){ var divMensaje = $("#divMensajeGeneral"); divMensaje.css("display","none"); }
+    function ponerCeros(obj) { obj = $.trim(obj); while (obj.toString().length < 2){ obj = '0'+obj; } return obj; }
+    <?php if(isset($this->perEsp[27])){ ?>
+    function js_rendercalendarioCronograma(){
+        $('#calendarCronograma').fullCalendar( 'destroy' );
+        var calendar = $('#calendarCronograma').fullCalendar({
+            header:{ left: 'title', center: '', right: 'prev,next' },
+            height: 390,
+            selectable: false,
+            editable: true,
+            disableResizing: true,
+            eventDrop: function( event, dayDelta, minuteDelta, allDay, revertFunc, jsEvent, ui, view ) {
+                var fechaGaux = new Array();
+                var k = 0;
+                $.each(fechaG, function(index, value) {
+                    var diferencia = value[1].getTime() - value[0].getTime();                
+                    var dias = Math.floor(diferencia/(1000 * 60 * 60 * 24));
+                    var fech;
+                    var c = 0;
+                    while(c <= dias){
+                        var fech = new Date(value[0].getTime() + (c * 24 * 3600 * 1000));
+                        fechaGaux[k] = fech;
+                        k++;
+                        c++;
+                    }
+                });
+
+                var fecha1 = new fecha(auxhdnfechafin);
+                var fecha2 = new fecha(auxhdnfechainicio);
+                var miFecha1 = new Date( fecha1.anio+"/"+fecha1.mes+"/"+fecha1.dia ); 
+                var miFecha2 = new Date( fecha2.anio+"/"+fecha2.mes+"/"+fecha2.dia );
+                var diferencia = miFecha1.getTime() - miFecha2.getTime();  
+                var dias = Math.floor(diferencia/(1000 * 60 * 60 * 24));
+                var fechas = new Array();
+                var fech;
+                var c = 0;
+                while(c <= dias){
+                    var today = new Date(fecha2.anio+"/"+fecha2.mes+"/"+fecha2.dia);
+                    fech = new Date(today.getTime() + (c * 24 * 3600 * 1000));
+                    fechas[c] = fech;
+                    c++;
+                }
+
+                var pasei = true;
+                $.each(fechas,function(indice,valor) { if(valor.getDate()+"/"+valor.getMonth() == event.start.getDate()+"/"+event.start.getMonth()) pasei = false; });
+                $.each(fechaGaux,function(indice,valor) { if(valor.getDate()+"/"+valor.getMonth() == event.start.getDate()+"/"+event.start.getMonth()) pasei = true; });
+                if(pasei){ revertFunc(); }else{
+                    var starts = (1900+event.start.getYear())+"-"+ponerCeros((event.start.getMonth()+1))+"-"+ponerCeros(event.start.getDate());
+                    $.ajax({ url: "/cronograma/cronogramamodificar/", dataType: "json", data: { id: event.id, start: starts }, success: function(data) { } });
+                }
+            },
+            events: { url: "/cronograma/cronogramaobtener/", type: "POST", data: { "idCronograma": idCronograma } },
+            eventClick: function(calEvent, jsEvent, view) {
+                if(auxestado == 1){
+                    $.ajax({ url: "/cronograma/cronogramaeventoeliminar/", dataType: "json", data: { id: calEvent.id },
+                        success: function(data) { $('#calendarCronograma').fullCalendar('removeEvents', calEvent.id); for (var i=0;i<fechaG.length;i++){ if ($.trim(fechaG[i][0]) == $.trim(calEvent.start)){ fechaG.splice(i, 1); } } }
+                    }); }
+            },
+            viewDisplay   : function(view) {
+                var now = new Date(); 
+                var end = new Date();
+                var fechainicio = auxhdnfechainicio.split("/");
+                var fechafin = auxhdnfechafin.split("/");
+
+                var cal_date_string = view.start.getMonth()+'/'+view.start.getFullYear();
+                var cur_date_string = fechainicio[1]-1+'/'+fechainicio[2];
+                var end_date_string = fechafin[1]-1 +'/'+fechafin[2];
+
+                if(cal_date_string == cur_date_string) { $('.fc-button-prev').addClass("fc-state-disabled"); }
+                else { $('.fc-button-prev').removeClass("fc-state-disabled"); }
+
+                if(end_date_string == cal_date_string) { $('.fc-button-next').addClass("fc-state-disabled"); }
+                else { $('.fc-button-next').removeClass("fc-state-disabled"); }
+
+                CadenaFecha1 = auxhdnfechafin;
+                CadenaFecha2 = auxhdnfechainicio;
+                var fecha1 = new fecha( CadenaFecha1 );
+                var fecha2 = new fecha( CadenaFecha2 );
+                var miFecha1 = new Date( fecha1.anio+"/"+fecha1.mes+"/"+fecha1.dia )  
+                var miFecha2 = new Date( fecha2.anio+"/"+fecha2.mes+"/"+fecha2.dia )  
+                var diferencia = miFecha1.getTime() - miFecha2.getTime();  
+                var dias = Math.floor(diferencia/(1000 * 60 * 60 * 24));
+
+                var fechas = new Array();
+                var fech;
+                var c = 0;
+                while(c <= dias){
+                    var today = new Date(fecha2.anio+"/"+fecha2.mes+"/"+fecha2.dia);
+                    var fech = new Date(today.getTime() + (c * 24 * 3600 * 1000));
+                    fechas[c] = fech.getDate()+"_"+(fech.getMonth()+1);
+                    c++;
+                }
+                $("#calendarCronograma .fc-content table td").each(function(index) {
+                    var obj = $(this);
+                    obj.addClass("fc-other-month");
+                    obj.css("background-color","#FFF");
+                    $.each(fechas,function(indice,valor) {
+                        if( ("cell_" + $.trim(valor)) == obj.find("div.fc-day-number").attr("celda") ){
+                            obj.css("background-color","#ECF9FF");
+                            obj.css("font-weight","bold");
+                            obj.removeClass("fc-other-month");
+                        }
+                    });
+                });
+            }
+        });
+        var fechainicio = auxhdnfechainicio.split("/");
+        $("#calendarCronograma").fullCalendar( "gotoDate", fechainicio[2], fechainicio[1] - 1, fechainicio[0] );
+    }
+    <?php } ?>
+    function js_actualizar(){
+        $("#txtFechaInicio").val("");
+        $("#txtFechaFin").val("");
+        $("#selMotivo").val(0);
+        $("#selEstado").val(0);
+        $("#jqtblContenido").setGridParam({ 'url': "/cronograma/listar/?idCompania="+$("#selCompaniaUsuario").val()+ "&idLocalidad="+$("#selLocalidadUsuario").val()+ "&fechainicio="+$("#txtFechaInicio").val()+ "&fechafin="+$("#txtFechaFin").val()+ "&motivo="+$("#selMotivo").val()+ "&estado="+$("#selEstado").val() }).trigger("reloadGrid");
+    }
+    <?php if(isset($this->perEsp[28])){ ?>
+    function validateEmail(field, rules, i, options) {
+        var x = field.val().split(",");
+        var pase = false;
+        $.each(x, function(i, candidate){
+            var filter = /[\w-\.]{3,}@([\w-]{2,}\.)*([\w-]{2,}\.)[\w-]{2,4}/;
+            if(!filter.test($.trim(candidate)) || $.trim(candidate) == "") pase = true;
+        });
+        if(pase) return options.allrules.email.alertText;  
+    } 
+    <?php } ?>
+    function js_reloadgrilla(){ $("#jqtblContenido").setGridParam({ 'url': "/cronograma/listar/?idCompania="+$("#selCompaniaUsuario").val()+ "&idLocalidad="+$("#selLocalidadUsuario").val()+ "&fechainicio="+$("#txtFechaInicio").val()+ "&fechafin="+$("#txtFechaFin").val()+ "&motivo="+$("#selMotivo").val()+ "&estado="+$("#selEstado").val() }).trigger("reloadGrid"); }
+});
+</script>

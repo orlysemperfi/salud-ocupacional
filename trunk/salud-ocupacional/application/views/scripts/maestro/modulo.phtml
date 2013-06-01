@@ -1,0 +1,536 @@
+<div id="divBarraTitulo">
+    Roles y Módulos
+</div>
+<div id="divBarraHerramientas">
+    <div class="divIzquierda" style="width: 70% !important">
+        <button name="btnNuevo" id="btnNuevo">Nuevo Rol</button>
+        <button name="btnActualizar" id="btnActualizar">Actualizar</button>
+        <button name="btnGuardar" id="btnGuardar">Guardar</button>
+        <div id="divMensaje" style="display: inline"></div>
+    </div>
+    <div class="divDerecha" style="width: 30% !important">
+        <div id="divMensajeGeneral" class="divDialogTitulo ui-state-highlight ui-corner-all oculto">
+        </div>
+    </div>
+</div>
+<div id="divGrilla">
+    <form name="frmMaestro" id="frmMaestro" method="post">
+        <input type="hidden" name="idRol" id="idRol" />
+        <div style="width: auto; float: left">
+            <table id="jqtblContenido"></table>
+            <div id="jqdivPaginado"></div>
+        </div>
+        <div style="width: auto; float: left; margin-left: 10px;">
+            <table id="jqtblContenidos"></table>
+            <div id="jqdivPaginados"></div>
+        </div>
+    </form>
+</div>
+<div class="contextMenu" id="MenuJqGrid">
+    <ul>
+        <li id="seleccionar">Seleccionar</li>
+        <li id="modificar">Modificar</li>
+        <li id="eliminar">Eliminar</li>
+    </ul>
+</div>
+<div id="dialogNuevoUsuario" title="Nuevo Rol" class="dialogForms" style="overflow: hidden"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Ingrese la información requerida:
+    </div>
+    <div id="divDialogContenido">
+        <form action="" method="post" id="frmNuevoUsuario" name="frmNuevoUsuario">
+            <table id="tblNuevoUsuario" style="width:349px">
+                <tr>
+                    <td width="129" class="txtDer">Nombre del Rol</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtNombre" name="txtNombre" maxlength="50" class="validate[required, minSize[3]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Descripción</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtDescripcion" name="txtDescripcion" maxlength="50" class="validate[required, minSize[3]]" /></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+<div id="dialogModificarUsuario" title="Modificar Usuario" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Ingrese la información requerida:
+    </div>
+    <div id="divDialogContenido">
+        <form action="" method="post" id="frmModificarUsuario" name="frmModificarUsuario">
+            <input type="hidden" id="hdnIdRol" name="hdnIdRol" />
+            <input type="hidden" id="hdnOpcion" name="hdnOpcion" value="2" />
+            <table id="tblModificarUsuario" style="width:349px">
+                <tr>
+                    <td width="129" class="txtDer">Nombre del Rol</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtNombre" name="txtNombre" maxlength="50" class="validate[required, minSize[3]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Descripción</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtDescripcion" name="txtDescripcion" maxlength="50" class="validate[required, minSize[3]]" /></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+<div id="dialogEliminarUsuario" title="Eliminar Rol" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        ¿Está seguro de eliminar este registro?
+    </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#jqtblContenido").jqGrid({
+        url: "/maestro/listarroles/",
+        datatype: "json",
+        mtype: "POST",
+        height: 460,
+        width: 500,
+        shrinkToFit: true,
+        colNames:["idRol","Rol","Descripción"],
+        colModel:[
+                {name:'idRol',      index:'idRol',      hidden: true },
+                {name:'rol',        index:'rol',        width:150,  sortable:false, align:'left' },
+                {name:'descripcion',index:'descripcion',width:350,  sortable:false, align:'left' }
+        ],
+        gridComplete: function() {
+            var registros = $("#jqtblContenido").getRowData();
+            var c = 0;
+            var id = "";
+            while(c < registros.length){
+                id = registros[c].idRol;
+                $("#"+id).contextMenu("MenuJqGrid", eventsMenu);
+                c++;
+            }
+        },
+        rowNum:2000,
+        rowTotal: 10000,
+        rownumbers: true,
+        loadonce: false,
+        ignoreCase: true,
+        gridview: false,
+        viewrecords: true,
+        caption:"Roles"
+    });
+    $("#jqtblContenidos").jqGrid({
+        url: "/maestro/listarmodulos/",
+        datatype: "json",
+        mtype: "POST",
+        height: 460,
+        width: 800,
+        shrinkToFit: true,
+        colNames:["idModulo","idModuloPadre","Modulo","Descripción","flg"],
+        colModel:[
+            {name:'idModulo',       index:'idModulo',       hidden: true },
+            {name:'idModuloPadre',  index:'idModuloPadre',  hidden: true },
+            {name:'modulo',         index:'modulo',         width:300,  sortable:false, align:'left' },
+            {name:'descripcion',    index:'descripcion',    width:500,  sortable:false, align:'left' },
+            {name:'flg',            index:'flg',            hidden: true }
+        ],
+        gridComplete: function() { 
+            var registros = $("#jqtblContenidos").getRowData();
+            var ids = $("#jqtblContenidos").jqGrid("getDataIDs");
+            var c = 0;
+            while(c < registros.length){
+                $("#jqtblContenidos #"+ids[c]+" input[type=checkbox]").val(ids[c]);
+                $("#jqtblContenidos #"+ids[c]+" input[type=checkbox]").attr("name", "groupim[]");
+                if($("#jqtblContenidos").jqGrid('getCell', ids[c], 'flg') == 0){
+                    $("#jqtblContenidos").jqGrid("resetSelection", ids[c]);
+                }else{
+                    $("#jqtblContenidos").jqGrid("setSelection", ids[c]);
+                }
+                if($("#jqtblContenidos").jqGrid('getCell', ids[c], 'idModuloPadre') == 0){
+                    $("#jqtblContenidos").jqGrid('setCell',ids[c],'modulo',"",{color:'#EC7E1B', fontWeight:'bold'});
+                }
+                c++;
+            }
+        },
+        rowNum:2000,
+        rowTotal: 10000,
+        rownumbers: true,
+        loadonce: false,
+        ignoreCase: true,
+        gridview: false,
+        viewrecords: true,
+        multiselect: true,
+        caption:"Módulos y opciones"
+    });
+    $(".ui-jqgrid-titlebar-close").remove();
+    var objDNU = "#dialogNuevoUsuario";
+    $("#btnGuardar").button({ icons: { primary: "ui-icon-disk" } }).click(function(){
+        $.ajax({
+            url: '/maestro/guardar/',
+            type: "POST",
+            data: $("#frmMaestro").serialize(),
+            beforeSend:function(){
+                $("#divMensaje").html("<img src='/images/loading.gif' />");
+            },
+            success: function(data) {
+                $("#divMensaje").html("");
+            }
+        });
+    });
+    $("#btnActualizar")
+        .button({ icons: { primary: "ui-icon-refresh" } })
+        .click(function(){ $("#jqtblContenido").trigger("reloadGrid"); $("#jqtblContenidos").trigger("reloadGrid"); });
+    $("#btnNuevo")
+        .button({ icons: { primary: "ui-icon-plus" } })
+        .click(function(){
+        $(objDNU).dialog("open"); 
+    });
+    $(objDNU).dialog({
+        closeOnEscape: false,
+        autoOpen: false,
+        height: 210,
+        width: 370,
+        modal: true,
+        resizable: false,
+        open: function(){
+            js_resetForm(objDNU);
+            $(objDNU + " #txtNombre").focus();
+            js_validarDNU();
+        },
+        buttons:{
+            "Guardar": function(){ $("#frmNuevoUsuario").submit(); },
+            "Cancelar": function(){ $(this).dialog("close"); }
+        },
+        close: function() { $("#frmNuevoUsuario").validationEngine("hideAll"); }
+    });
+    var objDMU = "#dialogModificarUsuario";
+    $(objDMU).dialog({
+        closeOnEscape: false,
+        autoOpen: false,
+        height: 240,
+        width: 370,
+        modal: true,
+        resizable: false,
+        open: function(){
+            js_resetForm(objDMU);
+        },
+        buttons:{
+            "Guardar": function(){ $("#frmModificarUsuario").submit(); },
+            "Cancelar": function(){ $(this).dialog("close"); }
+        },
+        close: function() { $("#frmModificarUsuario").validationEngine("hideAll"); }
+    });
+    var objDEU = "#dialogEliminarUsuario";
+    $(objDEU).dialog({
+        closeOnEscape: false,
+        autoOpen: false,
+        height: 160,
+        width: 370,
+        modal: true,
+        resizable: false,
+        buttons:{
+            "Sí": function(){ 
+                $.ajax({
+                    url: '/maestro/eliminar/',
+                    type: "POST",
+                    data: "idRol=" + idRol,
+                    success: function(data) {
+                        $("#jqtblContenido").trigger("reloadGrid");
+                        $("#jqtblContenidos").trigger("reloadGrid");
+                        js_mensajeGeneral(data);
+                        $(objDEU).dialog("close");
+                    }
+                });
+            },
+            "No": function(){ $(this).dialog("close"); }
+        }
+    });
+    eventsMenu = {
+        bindings:{
+            'seleccionar':function(t){
+                idRol = t.id;
+                $("#jqtblContenido").jqGrid("setSelection", idRol);
+                $("#idRol").val(idRol);
+                $("#jqtblContenidos").setGridParam({ "url": "/maestro/listarmodulos/?idRol="+idRol }).trigger("reloadGrid");
+            },
+            'modificar':function(t){
+                idRol = t.id;
+                var contenidoaux;
+                $(objDMU).dialog("open");
+                $.ajax({
+                    url: '/maestro/modificar/',
+                    type: "POST",
+                    data: "hdnIdRol=" + idRol + "&hdnOpcion=1",
+                    beforeSend:function(){
+                        contenidoaux = $(objDMU + " #divDialogContenido").html();
+                        $(objDMU + " #divDialogContenido").html(msjCargando);
+                    },
+                    success: function(data) {
+                        var objs = $.parseJSON(data);
+                        $(objDMU + " #divDialogContenido").html(contenidoaux);
+                        $(objDMU + " #hdnIdRol").val(objs.idRol);
+                        $(objDMU + " #txtNombre").val(objs.nombre);
+                        $(objDMU + " #txtDescripcion").val(objs.descripcion);
+                        $(objDMU + " #txtNombre").focus();
+                        js_validarDMU();
+                    }
+                });
+            },
+            'eliminar':function(t){
+                idRol = t.id;
+                $(objDEU).dialog("open");
+            }
+        },
+        onShowMenu: function(e, menu) {
+            var obj = $(e.target).parent().find("td[aria-describedby=jqtblContenido_idRol]").html();
+            if(obj == 14){
+                $('#eliminar', menu).remove();
+            }
+            return menu;
+        }
+    }
+    var idRol;
+    var msjCargando = "<div id='divCargadorPrincipal'><img src='/images/loading.gif' /><br>Cargando...</div>";
+    function js_mensajeGeneral(data){
+        var objs = $.parseJSON(data);
+        var divMensaje = $("#divMensajeGeneral");
+        divMensaje.css("display","block");
+        divMensaje.css("padding","7px");
+        divMensaje.css("margin","0px");
+        divMensaje.html("");
+        divMensaje.html(objs.message);
+        setTimeout("js_mensajeGeneralOculta()", 3000);
+    }
+    function js_mensajeGeneralOculta(){
+        var divMensaje = $("#divMensajeGeneral");
+        divMensaje.css("display","none");
+    }
+    function js_validarDNU(){
+        $("#frmNuevoUsuario").validationEngine("attach");
+        $("#frmNuevoUsuario").validationEngine("attach", {
+                onValidationComplete: function(form, status){
+                    if(status){
+                        $.ajax({
+                            url: '/maestro/registrar/',
+                            type: "POST",
+                            data: $("#frmNuevoUsuario").serialize(),
+                            beforeSend:function(){
+                                $("#frmNuevoUsuario").validationEngine("detach");
+                            },
+                            success: function(data) {
+                                var objs = $.parseJSON(data);
+                                if(objs.status == 1){
+                                    $("#jqtblContenido").trigger("reloadGrid");
+                                    $("#jqtblContenidos").trigger("reloadGrid");
+                                    $("#dialogNuevoUsuario").dialog("close");
+                                    js_mensajeGeneral(data);
+                                }else{
+                                    js_validarDNU();
+                                }
+                            }
+                        });
+                    }
+                },
+                promptPosition : "topLeft", 
+                scroll: false,
+                autoHidePrompt: true,
+                autoHideDelay: 1000
+            }
+        );
+    }
+    function js_validarDMU(){
+        $("#frmModificarUsuario").validationEngine("attach");
+        $("#frmModificarUsuario").validationEngine("attach", {
+                onValidationComplete: function(form, status){
+                    if(status){
+                        $.ajax({
+                            url: '/maestro/modificar/',
+                            type: "POST",
+                            data: $("#frmModificarUsuario").serialize(),
+                            beforeSend:function(){
+                                $("#frmModificarUsuario").validationEngine("detach");
+                            },
+                            success: function(data) {
+                                var objs = $.parseJSON(data);
+                                if(objs.status == 1){
+                                    $("#jqtblContenido").trigger("reloadGrid");
+                                    $("#dialogModificarUsuario").dialog("close");
+                                    js_mensajeGeneral(data);
+                                }else{
+                                    js_validarDMU();
+                                }
+                            }
+                        });
+                    }
+                },
+                promptPosition : "topLeft", 
+                scroll: false,
+                autoHidePrompt: true,
+                autoHideDelay: 1000
+            }
+        );
+    }
+    function js_permiso(flg){
+        var contenidoaux;
+        var varData = "";
+        var idCompania = $("#frmPermisosUsuario #hdnIdCompania").val();
+        var idLocalidad = $("#frmPermisosUsuario #hdnIdLocalidad").val();
+        if(flg == 1)
+            varData = "hdnIdUsuario=" + idUsuario + "&hdnOpcion=1";
+        else
+            varData = $("#frmPermisosUsuario").serialize();
+
+        $.ajax({
+            url: '/usuario/permiso/',
+            type: "POST",
+            data: varData,
+            beforeSend:function(){
+                contenidoaux = $("#dialogPermisoUsuario #divDialogContenido").html();
+                $("#dialogPermisoUsuario #divDialogContenido").html(msjCargando);
+            },
+            success: function(data) {
+                var objs = $.parseJSON(data);
+                $(objDPU + " #divDialogContenido").html(contenidoaux);
+                $(objDPU + " #hdnIdCompania").val(objs.Generales[0].idCompania);
+                $(objDPU + " #hdnIdLocalidad").val(objs.Generales[0].idLocalidad);
+                $(objDPU + " #hdnIdUsuario").val(objs.Generales[0].idUsuario);
+                $(objDPU + " #hdnIdUsuarioRol").val(objs.Generales[0].idUsuarioRol);
+                $(objDPU + " #hdnIdRol").val(objs.Generales[0].idRol);
+                $(objDPU + " #hdnFlgPrincipal").val(objs.Generales[0].flg_principal);
+                if(objs.Generales[0].flg_principal == 1) $("#chkPrincipal").attr("checked", true);
+                else $("#chkPrincipal").attr("checked", false);
+                    
+                var objcl = $("#divCompaniasLocalidades");
+                objcl.html("");
+                var aux = "<ul>";
+                var checked = "";
+                var entrocheck = 0;
+                $.each(objs.Compania, function(i,row){
+                    if(row.idCompania == objs.Generales[0].idCompania) $("#spanCompania").html(row.nombre);
+                    aux += '<li><span>'+row.nombre+'</span>';
+                    aux += '<ul>';
+                    $.each(objs.Localidad, function(il,rowl){
+                        if(row.idCompania == rowl.idCompania){
+                            entrocheck = 0;
+                            if(rowl.idLocalidad == objs.Generales[0].idLocalidad && rowl.idCompania == objs.Generales[0].idCompania){
+                                $("#spanLocalidad").html(rowl.nombre);
+                                var extra = "background-color: #FF0000; color: #FFF";
+                            }
+                            $.each(objs.Generales, function(ie,rowe){
+                                if(rowl.idLocalidad == rowe.idLocalidad && rowl.idCompania == rowe.idCompania){
+                                    aux += '<li><input type="checkbox" checked name="localidad_'+rowl.idCompania+'_'+rowl.idLocalidad+'" value="'+rowl.idCompania+'_'+rowl.idLocalidad+'"><span style="font-weight:bold;'+extra+'">'+rowl.nombre+'</span>';
+                                    entrocheck = 1;
+                                }
+                            });
+                            if(entrocheck == 0){
+                                aux += '<li><input type="checkbox" name="localidad_'+rowl.idCompania+'_'+rowl.idLocalidad+'" value="'+rowl.idCompania+'_'+rowl.idLocalidad+'"><span>'+rowl.nombre+'</span>';
+                            }
+                        }
+                    });
+                    aux += '</ul>';
+                    aux += '</li>';
+                });          
+                aux += '</ul>';
+                objcl.append(aux);
+                js_tree($("#divCompaniasLocalidades"), "collapse", "checkbox", "select");
+
+                var objm = $("#divModulos");
+                var objp = $("#divPermisos");
+                objm.html("");
+                objp.html("");
+                var auxm = "<ul>";
+                var auxp = "";
+                entrocheck = 0;
+                $.each(objs.Modulo, function(i,row){
+                    if(row.idModuloPadre == 0){
+                        auxm += '<li><input type="checkbox" style="visibility: hidden"><span>'+row.nombre+'</span>';
+                        auxm += '<ul>';
+                        $.each(objs.Modulo, function(il,rowl){
+                            if(row.idModulo == rowl.idModuloPadre)
+                            auxm += '<li><input type="checkbox" style="visibility: hidden"><span>'+rowl.nombre+'</span>';
+                        });
+                        auxm += '</ul>';
+                        auxm += '</li>';
+                        entrocheck = 0
+                        $.each(objs.Especificos, function(ie,rowe){
+                            if(row.idModulo == ie){
+                                checked = "";
+                                if(rowe.flg_leer == 1) checked = "checked";
+                                auxp += '<input type="checkbox" '+checked+' id="permiso_'+row.idModulo+'_1" name="permiso_'+row.idModulo+'_1" value="1">';
+
+                                checked = "";
+                                if(rowe.flg_escribir == 1) checked = "checked";
+                                auxp += '<input type="checkbox" '+checked+' id="permiso_'+row.idModulo+'_2" name="permiso_'+row.idModulo+'_2" value="2">';
+
+                                checked = "";
+                                if(rowe.flg_modificar == 1) checked = "checked";
+                                auxp += '<input type="checkbox" '+checked+' id="permiso_'+row.idModulo+'_3" name="permiso_'+row.idModulo+'_3" value="3">';
+
+                                checked = "";
+                                if(rowe.flg_eliminar == 1) checked = "checked";
+                                auxp += '<input type="checkbox" '+checked+' id="permiso_'+row.idModulo+'_4" name="permiso_'+row.idModulo+'_4" value="4">';
+                                entrocheck = 1;
+                            }
+                        });
+                        if(entrocheck == 0){
+                            auxp += '<input type="checkbox" id="permiso_'+row.idModulo+'_1" name="permiso_'+row.idModulo+'_1" value="1">';
+                            auxp += '<input type="checkbox" id="permiso_'+row.idModulo+'_2" name="permiso_'+row.idModulo+'_2" value="2">';
+                            auxp += '<input type="checkbox" id="permiso_'+row.idModulo+'_3" name="permiso_'+row.idModulo+'_3" value="3">';
+                            auxp += '<input type="checkbox" id="permiso_'+row.idModulo+'_4" name="permiso_'+row.idModulo+'_4" value="4">';
+                        }
+
+                        $.each(objs.Modulo, function(il,rowl){
+                            if(row.idModulo == rowl.idModuloPadre){
+                                entrocheck = 0
+                                $.each(objs.Especificos, function(ie,rowe){
+                                    if(rowl.idModulo == ie){
+                                        checked = "";
+                                        if(rowe.flg_leer == 1) checked = "checked";
+                                        auxp += '<input type="checkbox" '+checked+' id="permiso_'+rowl.idModulo+'_1" name="permiso_'+rowl.idModulo+'_1" value="1">';
+
+                                        checked = "";
+                                        if(rowe.flg_escribir == 1) checked = "checked";
+                                        auxp += '<input type="checkbox" '+checked+' id="permiso_'+rowl.idModulo+'_2" name="permiso_'+rowl.idModulo+'_2" value="2">';
+
+                                        checked = "";
+                                        if(rowe.flg_modificar == 1) checked = "checked";
+                                        auxp += '<input type="checkbox" '+checked+' id="permiso_'+rowl.idModulo+'_3" name="permiso_'+rowl.idModulo+'_3" value="3">';
+
+                                        checked = "";
+                                        if(rowe.flg_eliminar == 1) checked = "checked";
+                                        auxp += '<input type="checkbox" '+checked+' id="permiso_'+rowl.idModulo+'_4" name="permiso_'+rowl.idModulo+'_4" value="4">';
+                                        entrocheck = 1;
+                                    }
+                                });
+                                if(entrocheck == 0){
+                                    auxp += '<input type="checkbox" id="permiso_'+rowl.idModulo+'_1" name="permiso_'+rowl.idModulo+'_1" value="1">';
+                                    auxp += '<input type="checkbox" id="permiso_'+rowl.idModulo+'_2" name="permiso_'+rowl.idModulo+'_2" value="2">';
+                                    auxp += '<input type="checkbox" id="permiso_'+rowl.idModulo+'_3" name="permiso_'+rowl.idModulo+'_3" value="3">';
+                                    auxp += '<input type="checkbox" id="permiso_'+rowl.idModulo+'_4" name="permiso_'+rowl.idModulo+'_4" value="4">';
+                                }
+                            }
+                        });
+                    }
+                });
+                auxm += '</ul>';
+                objm.append(auxm);
+                objp.append(auxp);
+                js_tree($("#divModulosPermisos"), "", "", "");
+            }
+        });
+    }
+    function js_limpiarasignar(){
+        $(objDAU + " #hdnIdUsuarioReemplazo").val("");
+        $(objDAU + " #txtUsuario").val("");
+        $(objDAU + " #txtCorreo").val("");
+        $(objDAU + " #txtNombres").val("");
+        $(objDAU + " #txtApellidos").val("").focus();
+
+        $(objDAU + " #hdnIdUsuarioReemplazo").attr("readonly",false);
+        $(objDAU + " #txtUsuario").attr("readonly",false);
+        $(objDAU + " #txtCorreo").attr("readonly",false);
+        $(objDAU + " #txtApellidos").attr("readonly",false);
+        $(objDAU + " #abbrev").attr("readonly",false);
+
+        $(objDAU + " #txtClaveA").attr("disabled",false);
+        $(objDAU + " #txtClaveCopia").attr("disabled",false);
+    }
+});
+</script>

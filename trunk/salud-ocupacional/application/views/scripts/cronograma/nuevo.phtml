@@ -1,0 +1,869 @@
+<div id="divBarraTitulo">
+    Módulo de Cronogramas | Nuevo
+</div>
+<div id="divBarraHerramientas">
+    <div class="divIzquierdas">
+        <form name="frmFiltro" id="frmFiltro" method="post" target="upload_target"
+              enctype="multipart/form-data"> 
+            <select id="selMotivo" name="selMotivo" class="validate[required]">
+                <option value="">SELECCIONE MOTIVO</option>
+                <option value="1">ANUAL</option>
+                <option value="2">EQUIPOS PESADOS</option>
+                <option value="3">TRABAJO EN ALTURA</option>
+                <option value="4">RETIRO</option>
+                <option value="5">INGRESO</option>
+            </select>
+             | 
+            <select id="selTipo" name="selTipo" class="validate[required]" disabled="disabled">
+                <option value="">TIPO</option>
+            </select>
+             | 
+            <select id="selCompaniaUsuario" name="selCompaniaUsuario" class="validate[required]">
+                <?php
+                foreach($this->rstListarCompania as $row){
+                    if($row["idCompania"] == $this->idCompania){
+                        echo '<option value="'.$row["idCompania"].'">'.$row["nombre"].'</option>';
+                        break;
+                    }
+                }
+                foreach($this->rstListarCompania as $row){
+                    if($row["idCompania"] != $this->idCompania){
+                        echo '<option value="'.$row["idCompania"].'">'.$row["nombre"].'</option>';
+                    }
+                }
+                ?>
+            </select>
+            <select id="selLocalidadUsuario" name="selLocalidadUsuario" class="validate[required]">
+                <?php
+                foreach($this->rstListarLocalidad as $row){
+                    if($row["idLocalidad"] == $this->idLocalidad){
+                        echo '<option value="'.$row["idLocalidad"].'">'.$row["nombre"].'</option>';
+                        break;
+                    }
+                }
+                foreach($this->rstListarLocalidad as $row){
+                    if($row["idLocalidad"] != $this->idLocalidad){
+                        echo '<option value="'.$row["idLocalidad"].'">'.$row["nombre"].'</option>';
+                    }
+                }
+                ?>
+            </select>
+            <div class="divCargadorPequeno" style="display:none"> <img src="/images/cargando.gif" /></div>
+             | 
+             <div id="divFiltro1" class="oculto">
+            <input type="text" id="txtFechaInicio" name="txtFechaInicio" readonly class="validate[required] datepicker" disabled="disabled" placeholder="Desde fecha" />
+            <input type="text" id="txtFechaFin" name="txtFechaFin" readonly class="validate[required] datepicker" disabled="disabled" placeholder="Hasta fecha" />
+             | 
+             </div>
+             <div id="divFiltro2" class="oculto">
+            <input type="text" id="txtEdadLimite" name="txtEdadLimite" class="validate[required]" placeholder="Edad" disabled="disabled" />
+             | 
+             </div>
+             <div id="divFiltro3" class="oculto">
+            <input type="hidden" id="hdnDNI" name="hdnDNI" />
+            <input type="text" id="txtNombres" name="txtNombres" class="validate[required]" placeholder="Ingrese nombre" disabled="disabled" />
+             | 
+             </div>
+             <div id="divFiltro4" class="oculto">
+            <input type="file" id="fileExcel" name="fileExcel" class="validate[required]" disabled="disabled" />
+             | 
+             </div>
+            <button name="btnReglas" id="btnReglas" type="button">Reglas</button>
+             | 
+            <button name="btnGenerar" id="btnGenerar" type="button">Generar Cronograma tentativo</button>
+        </form>
+    </div>
+    <div class="divDerechas">
+        <div id="divMensajeGeneral" class="divDialogTitulo ui-state-highlight ui-corner-all oculto">
+        </div>
+    </div>
+</div>
+<div id="divGrilla">
+    <form method="post" name="frmGrilla" id="frmGrilla">
+        <table id="jqtblContenido"></table>
+        <div id="jqdivPaginado"></div>
+    </form>
+</div>
+<div id="dialogReglas" title="Reglas" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        <form name="frmReglas" id="frmReglas" method="post"> 
+            <label for="txtFechaInicioRegla">Desde</label>
+            <input type="hidden" id="hdnFechaInicioRegla" name="hdnFechaInicioRegla" disabled="disabled" />
+            <input type="text" id="txtFechaInicioRegla" name="txtFechaInicioRegla" readonly class="validate[required] datepicker" />
+            <label for="txtFechaFinRegla"> - </label>
+            <input type="hidden" id="hdnFechaFinRegla" name="hdnFechaFinRegla" disabled="disabled" />
+            <input type="text" id="txtFechaFinRegla" name="txtFechaFinRegla" readonly disabled="disabled" class="validate[required] datepicker" />
+            <button name="btnLimpiar" id="btnLimpiar">Limpiar</button>
+        </form>
+    </div>
+    <div id="divDialogContenido">
+        <div id="calendar" style="margin-top: 10px"></div>
+    </div>
+</div>
+<div id="dialogCronograma" title="Cronograma tentativo" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Cronograma generado automáticamente, si desea cambiar de posición la cita de algún trabajador, solo arrastrelo
+        hasta la fecha deseada.
+    </div>
+    <div id="divDialogContenido">
+        <div id="calendarCronograma" style="margin-top: 10px"></div>
+    </div>
+</div>
+<div id="dialogAviso" title="Aviso" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+    </div>
+</div>
+<div id="dialogCorreos" title="Correos a notificar" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Ingrese los correos a los que se debe notificar separados por una coma ( , ).
+    </div>
+    <div id="divDialogContenido">
+        <form name="frmCorreos" id="frmCorreos" method="post"> 
+            <textarea id="txtCorreos" name="txtCorreos" class="validate[funcCall[validateEmail]]" 
+                      style="width: 330px; height: 50px"></textarea>            
+        </form>
+    </div>
+</div>
+<script type="text/javascript"> 
+var fechaG = new Array();
+function validateEmail(field, rules, i, options) {
+    var x = field.val().split(",");
+    var pase = false;
+    $.each(x, function(i, candidate){
+        var filter = /[\w-\.]{3,}@([\w-]{2,}\.)*([\w-]{2,}\.)[\w-]{2,4}/;
+        if(!filter.test($.trim(candidate)) || $.trim(candidate) == "")
+            pase = true;
+    });
+    
+    if(pase) return options.allrules.email.alertText;  
+}  
+function js_mostrarFiltrosMotivo(opc){
+    $("#txtFechaInicio").attr("disabled", true);
+    $("#txtFechaFin").attr("disabled", true);
+    $("#txtEdadLimite").attr("disabled", true);
+    $("#divFiltro1").attr("class", "oculto");
+    $("#divFiltro2").attr("class", "oculto");
+    switch(opc){
+        case 1:
+            $("#txtFechaInicio").attr("disabled", false);
+            $("#txtFechaFin").attr("disabled", false);
+            $("#divFiltro1").attr("class", "inline");
+            break;
+        case 2:
+            $("#txtEdadLimite").attr("disabled", false);
+            $("#divFiltro2").attr("class", "inline");
+            break;
+    }
+}
+function js_mostrarFiltrosTipo(opc){
+    $("#hdnDNI").attr("disabled", true);
+    $("#txtNombres").attr("disabled", true);
+    $("#fileExcel").attr("disabled", true);
+    $("#divFiltro3").attr("class", "oculto");
+    $("#divFiltro4").attr("class", "oculto");
+    $("#fileExcel").addClass("validate[required]");
+    switch(opc){
+        case 1:
+            $("#hdnDNI").attr("disabled", false);
+            $("#txtNombres").attr("disabled", false);
+            $("#divFiltro3").attr("class", "inline");
+            break;
+        case 2:
+            $("#fileExcel").attr("disabled", false); 
+            $("#divFiltro4").attr("class", "inline");
+            break;
+    }
+    $("#jqtblContenido").setGridParam({ "url": "/cronograma/recuperar/" }).trigger("reloadGrid");
+}
+function fecha(cadena) {  
+   var separador = "/";
+   if ( cadena.indexOf( separador ) != -1 ) {  
+        var posi1 = 0  
+        var posi2 = cadena.indexOf( separador, posi1 + 1 )  
+        var posi3 = cadena.indexOf( separador, posi2 + 1 )  
+        this.dia = cadena.substring( posi1, posi2 )  
+        this.mes = cadena.substring( posi2 + 1, posi3 )  
+        this.anio = cadena.substring( posi3 + 1, cadena.length )  
+   } else {  
+        this.dia = 0  
+        this.mes = 0  
+        this.anio = 0     
+   }  
+} 
+function ponerCeros(obj) {
+    obj = $.trim(obj);
+    while (obj.toString().length < 2){
+        obj = '0'+obj;
+    }
+    return obj;
+}
+function js_rendercalendario(){
+    var t = 0;
+    $('#calendar').fullCalendar( 'destroy' );
+    var calendar = $('#calendar').fullCalendar({
+        header:{ left: 'title', center: '', right: 'prev,next' },
+        height: 390,
+        selectable: true,
+        selectHelper: false,
+        select: function(start, end, allDay) { 
+            var fecha1 = new fecha($("#txtFechaFinRegla").val());
+            var fecha2 = new fecha($("#txtFechaInicioRegla").val());
+            var miFecha1 = new Date( fecha1.anio+"/"+fecha1.mes+"/"+fecha1.dia ); 
+            var miFecha2 = new Date( fecha2.anio+"/"+fecha2.mes+"/"+fecha2.dia );
+            var diferencia = miFecha1.getTime() - miFecha2.getTime();  
+            var dias = Math.floor(diferencia/(1000 * 60 * 60 * 24));
+
+            var fechas = new Array();
+            var fech;
+            var c = 0;
+            while(c <= dias){
+                var today = new Date(fecha2.anio+"/"+fecha2.mes+"/"+fecha2.dia);
+                var fech = new Date(today.getTime() + (c * 24 * 3600 * 1000));
+                fechas[c] = fech;
+                c++;
+            }
+            var pasei, pasef = false;
+            $.each(fechas,function(indice,valor) {
+                if(valor.getDate()+"/"+valor.getMonth() == start.getDate()+"/"+start.getMonth()) pasei = true
+                if(valor.getDate()+"/"+valor.getMonth() == end.getDate()+"/"+end.getMonth()) pasef = true
+            });
+            if(pasei && pasef){
+                var title = prompt('Descripcion:');
+                if (title && $.trim(title) != "") {
+                    var starts = (1900+start.getYear())+"-"+ponerCeros((start.getMonth()+1))+"-"+ponerCeros(start.getDate());
+                    var ends = (1900+end.getYear())+"-"+ponerCeros((end.getMonth()+1))+"-"+ponerCeros(end.getDate());
+                    $.ajax({
+                        url: "/cronograma/reglanueva/",
+                        dataType: "json",
+                        data: { title: title, start: starts, end: ends },
+                        success: function(data) {
+                            calendar.fullCalendar('renderEvent',{ 
+                                id: data.id, title: data.title, 
+                                start: data.start, end: data.end
+                            }, true );
+                            fechaG[t] = new Array(start, end);
+                            t++;
+                            $('#calendar').fullCalendar( 'destroy' );
+                            js_rendercalendario();
+                            var fechainicio = data.start.split("-");
+                            $("#calendar").fullCalendar( "gotoDate", fechainicio[0], fechainicio[1] - 1, fechainicio[2] );
+                        }
+                    });
+                }
+            }
+            calendar.fullCalendar('unselect');
+        },
+        events: "/cronograma/reglaobtener/?fechai="+$("#txtFechaInicioRegla").val()+"&fechaf="+$("#txtFechaFinRegla").val(),
+        eventClick: function(calEvent, jsEvent, view) {
+            $.ajax({
+                url: "/cronograma/reglaeliminar/",
+                dataType: "json",
+                data: { id: calEvent.id },
+                success: function(data) {
+                    $('#calendar').fullCalendar('removeEvents', calEvent.id);
+                    for (var i=0;i<fechaG.length;i++){
+                        if ($.trim(fechaG[i][0]) == $.trim(calEvent.start)){
+                            fechaG.splice(i, 1);
+                        }
+                    }
+                }
+            });
+        },
+        viewDisplay   : function(view) {
+            var now = new Date(); 
+            var end = new Date();
+            var fechainicio = $("#txtFechaInicioRegla").val().split("/");
+            var fechafin = $("#txtFechaFinRegla").val().split("/");
+            var cal_date_string = view.start.getMonth()+'/'+view.start.getFullYear();
+            var cur_date_string = fechainicio[1]-1+'/'+fechainicio[2];
+            var end_date_string = fechafin[1]-1 +'/'+fechafin[2];
+            
+            if(cal_date_string == cur_date_string) { $('.fc-button-prev').addClass("fc-state-disabled"); }
+            else { $('.fc-button-prev').removeClass("fc-state-disabled"); }
+            
+            if(end_date_string == cal_date_string) { $('.fc-button-next').addClass("fc-state-disabled"); }
+            else { $('.fc-button-next').removeClass("fc-state-disabled"); }
+
+            if($("#txtFechaInicioRegla").val() == ""){
+                $('.fc-button-prev').addClass("fc-state-disabled");
+                $('.fc-button-next').addClass("fc-state-disabled");
+            }
+            
+            CadenaFecha1 = $("#txtFechaFinRegla").val();
+            CadenaFecha2 = $("#txtFechaInicioRegla").val();
+            var fecha1 = new fecha( CadenaFecha1 );
+            var fecha2 = new fecha( CadenaFecha2 );
+            var miFecha1 = new Date( fecha1.anio+"/"+fecha1.mes+"/"+fecha1.dia )  
+            var miFecha2 = new Date( fecha2.anio+"/"+fecha2.mes+"/"+fecha2.dia )  
+            var diferencia = miFecha1.getTime() - miFecha2.getTime();  
+            var dias = Math.floor(diferencia/(1000 * 60 * 60 * 24));
+
+            var fechas = new Array();
+            var fech;
+            var c = 0;
+            while(c <= dias){
+                var today = new Date(fecha2.anio+"/"+fecha2.mes+"/"+fecha2.dia);
+                var fech = new Date(today.getTime() + (c * 24 * 3600 * 1000));
+                fechas[c] = fech.getDate()+"_"+(fech.getMonth()+1);
+                c++;
+            }
+            $("#calendar .fc-content table td").each(function(index) {
+                var obj = $(this);
+                obj.addClass("fc-other-month");
+                obj.css("background-color","#FFFFFF");
+                $.each(fechas,function(indice,valor) {
+                    if( ("cell_" + $.trim(valor)) == obj.find("div.fc-day-number").attr("celda") ){
+                        obj.css("background-color","#ECF9FF");
+                        obj.css("font-weight","bold");
+                        obj.removeClass("fc-other-month");
+                    }
+                });
+            });
+        }
+    });
+    var fechainicio = $("#txtFechaInicioRegla").val().split("/");
+    $("#calendar").fullCalendar( "gotoDate", fechainicio[2], fechainicio[1] - 1, fechainicio[0] );
+    $(".fc-button-next, .fc-button-prev").click(function(){
+//        setTimeout(function() {
+//            var wid = ""; var lef = ""; var tex = ""; var j = 0;
+//            $(".fc-view div.fc-event").each(function(){
+//                wid = $(this).css("width");
+//                lef = $(this).css("left");
+//                tex = $(this).find("span").html();
+//                j = 0;
+//                $(".fc-view div.fc-event").each(function(){
+//                    if(wid == $(this).css("width") && lef == $(this).css("left") && tex == $(this).find("span").html()){
+//                        j++;
+//                    }
+//                });
+//                $(".fc-view div.fc-event").each(function(){  
+//                    if(j > 1 && wid == $(this).css("width") && lef == $(this).css("left") && tex == $(this).find("span").html()){
+//                        $(this).remove();
+//                        j--;
+//                    }
+//                });
+//            });
+//        }, 100);
+    });
+}
+function js_rendercalendarioCronograma(){
+    $('#calendarCronograma').fullCalendar( 'destroy' );
+    var calendar = $('#calendarCronograma').fullCalendar({
+        header:{ left: 'title', center: '', right: 'prev,next' },
+        height: 390,
+        selectable: false,
+        editable: true,
+        disableResizing: true,
+        eventDrop: function( event, dayDelta, minuteDelta, allDay, revertFunc, jsEvent, ui, view ) {
+            var fechaGaux = new Array();
+            var k = 0;
+            $.each(fechaG, function(index, value) {
+                var diferencia = value[1].getTime() - value[0].getTime();                
+                var dias = Math.floor(diferencia/(1000 * 60 * 60 * 24));
+                var fech;
+                var c = 0;
+                while(c <= dias){
+                    var fech = new Date(value[0].getTime() + (c * 24 * 3600 * 1000));
+                    fechaGaux[k] = fech;
+                    k++;
+                    c++;
+                }
+            });
+            
+            var fecha1 = new fecha($("#hdnFechaFinRegla").val());
+            var fecha2 = new fecha($("#hdnFechaInicioRegla").val());
+            var miFecha1 = new Date( fecha1.anio+"/"+fecha1.mes+"/"+fecha1.dia ); 
+            var miFecha2 = new Date( fecha2.anio+"/"+fecha2.mes+"/"+fecha2.dia );
+            var diferencia = miFecha1.getTime() - miFecha2.getTime();  
+            var dias = Math.floor(diferencia/(1000 * 60 * 60 * 24));
+            var fechas = new Array();
+            var fech;
+            var c = 0;
+            while(c <= dias){
+                var today = new Date(fecha2.anio+"/"+fecha2.mes+"/"+fecha2.dia);
+                fech = new Date(today.getTime() + (c * 24 * 3600 * 1000));
+                fechas[c] = fech;
+                c++;
+            }
+            
+            var pasei = true;
+            $.each(fechas,function(indice,valor) {
+                if(valor.getDate()+"/"+valor.getMonth() == event.start.getDate()+"/"+event.start.getMonth()) pasei = false;
+            });
+            $.each(fechaGaux,function(indice,valor) {
+                if(valor.getDate()+"/"+valor.getMonth() == event.start.getDate()+"/"+event.start.getMonth()) pasei = true;
+            });
+            if(pasei) revertFunc();
+            else{
+                var starts = (1900+event.start.getYear())+"-"+ponerCeros((event.start.getMonth()+1))+"-"+ponerCeros(event.start.getDate());
+                $.ajax({
+                    url: "/cronograma/cronogramamodificarevento/",
+                    dataType: "json",
+                    data: { id: event.id, start: starts },
+                    success: function(data) { }
+                });
+            }
+        },
+        events: "/cronograma/cronogramaobtenerevento/",
+        viewDisplay   : function(view) {
+            var now = new Date(); 
+            var end = new Date();
+            var fechainicio = $("#hdnFechaInicioRegla").val().split("/");
+            var fechafin = $("#hdnFechaFinRegla").val().split("/");
+            var cal_date_string = view.start.getMonth()+'/'+view.start.getFullYear();
+            var cur_date_string = fechainicio[1]-1+'/'+fechainicio[2];
+            var end_date_string = fechafin[1]-1 +'/'+fechafin[2];
+
+            if(cal_date_string == cur_date_string) { jQuery('.fc-button-prev').addClass("fc-state-disabled"); }
+            else { jQuery('.fc-button-prev').removeClass("fc-state-disabled"); }
+
+            if(end_date_string == cal_date_string) { jQuery('.fc-button-next').addClass("fc-state-disabled"); }
+            else { jQuery('.fc-button-next').removeClass("fc-state-disabled"); }
+
+            CadenaFecha1 = $("#hdnFechaFinRegla").val();
+            CadenaFecha2 = $("#hdnFechaInicioRegla").val();
+            var fecha1 = new fecha( CadenaFecha1 );
+            var fecha2 = new fecha( CadenaFecha2 );
+            var miFecha1 = new Date( fecha1.anio+"/"+fecha1.mes+"/"+fecha1.dia )  
+            var miFecha2 = new Date( fecha2.anio+"/"+fecha2.mes+"/"+fecha2.dia )  
+            var diferencia = miFecha1.getTime() - miFecha2.getTime();  
+            var dias = Math.floor(diferencia/(1000 * 60 * 60 * 24));
+
+            var fechas = new Array();
+            var fech;
+            var c = 0;
+            while(c <= dias){
+                var today = new Date(fecha2.anio+"/"+fecha2.mes+"/"+fecha2.dia);
+                var fech = new Date(today.getTime() + (c * 24 * 3600 * 1000));
+                fechas[c] = fech.getDate()+"_"+(fech.getMonth()+1);
+                c++;
+            }
+            $("#calendarCronograma .fc-content table td").each(function(index) {
+                var obj = $(this);
+                obj.addClass("fc-other-month");
+                obj.css("background-color","#FFF");
+                $.each(fechas,function(indice,valor) {
+                    if( ("cell_" + $.trim(valor)) == obj.find("div.fc-day-number").attr("celda") ){
+                        obj.css("background-color","#ECF9FF");
+                        obj.css("font-weight","bold");
+                        obj.removeClass("fc-other-month");
+                    }
+                });
+            });
+        }
+    });
+    var fechainicio = $("#hdnFechaInicioRegla").val().split("/");
+    $("#calendarCronograma").fullCalendar( "gotoDate", fechainicio[2], fechainicio[1] - 1, fechainicio[0] );
+}
+$(document).ready(function(){
+    var p_genera = 0;
+    $("#btnGenerar").button({ icons: { primary: "ui-icon-check" } });
+    
+    $("#btnGenerar").click(function(){
+        if($("#frmFiltro").validationEngine("validate")){
+            p_genera = 0;
+            var pase = true;
+            $("#dialogAviso").dialog("open");
+            $("#frmGrilla input[type=checkbox]").each(function() { if ( ($(this).attr("checked")) ){ pase = false; } });
+            
+            if($.trim($("#hdnFechaInicioRegla").val()) == ""){
+                $("#dialogAviso").dialog("open");
+                $("#dialogAviso .divDialogTitulo").html("No ha ingresado las fechas para las reglas del cronograma.");
+            }else if(pase){
+                p_genera = 1;
+                if($("#jqg_jqtblContenido_0").attr("name") == "jqg_jqtblContenido_0"){ $("#frmFiltro").submit(); }
+                $("#dialogAviso .divDialogTitulo").html("Debe seleccionar por lo menos un registro.");
+            }else{
+                p_genera = 1;
+                $("#dialogAviso .divDialogTitulo").html("<img src='/images/cargando.gif' /> Generando cronograma tentativo...");
+                $.ajax({
+                    url: "/cronograma/generar/",
+                    type: "POST",
+                    data: $("#frmFiltro").serialize() + "&" + $("#frmReglas").serialize() + "&" + $("#frmGrilla").serialize(),
+                    success: function(data) {
+                        $("#dialogCronograma").dialog("open");
+                        $("#dialogAviso").dialog("close");
+                    }
+                });
+            }
+        }else{ p_genera = 0; }
+    });
+    $("#dialogCronograma").dialog({
+        closeOnEscape: false,
+        autoOpen: false,
+        height: 600,
+        width: 1330,
+        modal: true,
+        resizable: false,
+        open: function(){ js_rendercalendarioCronograma(); },
+        buttons:{ 
+            "Ingresar correos": function(){ 
+                $("#dialogCorreos").dialog("open");
+            },
+            "Cerrar": function(){ $(this).dialog("close"); } 
+        },
+        close: function() { }
+    });
+    $("#dialogCorreos").dialog({
+        autoOpen: false,
+        height: 250,
+        width: 370,
+        modal: true,
+        resizable: false,
+        open: function(){ 
+            $.ajax({
+                url: "/cronograma/obtenercorreos/",
+                type: "POST",
+                data: $("#frmFiltro").serialize(),
+                success: function(data) {
+                    $("#txtCorreos").val(data);
+                }
+            });
+        },
+        buttons:{ 
+            "Generar Cronograma": function(){ 
+                $("#frmCorreos").submit();
+            } 
+        }
+    });
+    
+    $("#frmCorreos").validationEngine("attach", {
+        onValidationComplete: function(form, status){
+            if(status){
+                $.ajax({
+                    url: "/cronograma/registrar/",
+                    type: "POST",
+                    data: $("#frmFiltro").serialize() + "&" + $("#frmReglas").serialize() + "&" + $("#frmCorreos").serialize(),
+                    beforeSend:function(){
+                        $("#dialogAviso").dialog("open");
+                        $("#dialogAviso .divDialogTitulo").html("Generando cronograma.");
+                    },
+                    success: function(data) {
+                        $(location).attr("href", "/cronograma/");
+                    }
+                });
+            }
+        },
+        promptPosition : "topLeft", 
+        scroll: false,
+        autoHidePrompt: true,
+        autoHideDelay: 3000
+    });
+    $("#dialogAviso").dialog({
+        autoOpen: false,
+        height: 120,
+        width: 250,
+        modal: true,
+        resizable: false,
+        open: function(){ $("#dialogAviso .divDialogTitulo").html(""); },
+        close: function() { if(p_genera == 0) $("#dialogReglas").dialog("open"); }
+    });
+        
+    $("#btnReglas").button({ icons: { primary: "ui-icon-calculator" } });
+    $("#btnReglas").click(function(){ $("#dialogReglas").dialog("open"); });
+    $("#dialogReglas").dialog({
+        closeOnEscape: false,
+        autoOpen: false,
+        height: 600,
+        width: 900,
+        modal: true,
+        resizable: false,
+        open: function(){ js_rendercalendario(); },
+        buttons:{ "Cerrar": function(){ $(this).dialog("close"); } },
+        close: function() { }
+    });
+    $( "#txtFechaInicioRegla" ).datepicker({
+        dateFormat: "dd/mm/yy",
+        defaultDate: "0",
+        minDate: "0d",
+        maxDate: "+2m -1d",
+        changeMonth: true,
+        numberOfMonths: 1,
+        onClose: function( selectedDate ) {
+            $( "#txtFechaFinRegla" ).datepicker( "option", "minDate", selectedDate );
+            if($("#txtFechaFinRegla").val() != "") $( "#frmReglas" ).submit();
+            if($( "#txtFechaInicioRegla" ).val() != ""){
+                $( "#txtFechaInicioRegla" ).attr("disabled", true);
+                $( "#txtFechaFinRegla" ).attr("disabled", false);
+            }
+        }
+    });
+    $( "#txtFechaFinRegla" ).datepicker({
+        dateFormat: "dd/mm/yy",
+        defaultDate: "0",
+        minDate: "0d",
+        maxDate: "+2m -1d",
+        changeMonth: true,
+        numberOfMonths: 1,
+        onClose: function( selectedDate ) {
+            $( "#txtFechaInicioRegla" ).datepicker( "option", "maxDate", selectedDate );
+            if($("#txtFechaInicioRegla").val() != "") $( "#frmReglas" ).submit();
+        }
+    });
+    $("#btnLimpiar").button({ icons: { primary: "ui-icon-unlocked" } });
+    $("#btnLimpiar").click(function(){
+        $.ajax({
+            url: "/cronograma/reglalimpiar/",
+            success: function(data) {
+                $("#hdnFechaInicioRegla").val("");
+                $("#hdnFechaFinRegla").val("");
+
+                $("#txtFechaInicioRegla").val("");
+                $("#txtFechaFinRegla").val("");
+
+                $("#txtFechaInicioRegla").attr("disabled", false);
+                $("#txtFechaFinRegla").attr("disabled", false);
+                $("#btnProcesa").attr("disabled", false);
+                $("#hdnFechaInicioRegla").attr("disabled", true);
+                $("#hdnFechaFinRegla").attr("disabled", true);
+                
+                $("#txtFechaInicioRegla").datepicker( "option", "maxDate", "+2m -1d" );
+                $("#btnProcesa").removeClass("ui-state-hover");
+                $("#txtFechaInicioRegla").focus();
+                $('#calendar').fullCalendar( 'destroy' );
+                js_rendercalendario();
+            }
+        });
+    });
+    $("#frmReglas").validationEngine("attach", {
+        onValidationComplete: function(form, status){
+            if(status){
+                $("#hdnFechaInicioRegla").val($("#txtFechaInicioRegla").val());
+                $("#hdnFechaFinRegla").val($("#txtFechaFinRegla").val());
+                
+                $("#txtFechaInicioRegla").attr("disabled", true);
+                $("#txtFechaFinRegla").attr("disabled", true);
+                $("#btnProcesa").attr("disabled", true);
+                $("#hdnFechaInicioRegla").attr("disabled", false);
+                $("#hdnFechaFinRegla").attr("disabled", false);
+                js_rendercalendario();
+            }
+        },
+        promptPosition : "bottomLeft", 
+        scroll: false,
+        autoHidePrompt: true,
+        autoHideDelay: 3000
+    });
+    $("#fileExcel").change(function(){
+       $("#frmFiltro").submit(); 
+    });
+    $("#frmFiltro").validationEngine("attach", {
+        onValidationComplete: function(form, status){
+            if(status){
+                if($("#selTipo").val() == 2){
+                    $.ajaxFileUpload({
+                        url:'/cronograma/subirarchivo/',
+                        secureuri:false,
+                        fileElementId:'fileExcel',
+                        dataType: 'json',
+                        data:{name:'logan', id:'id'},
+                        success: function (data, status){
+                            if(typeof(data.error) != 'undefined'){
+                                if(data.error != ''){
+                                    alert(data.error);
+                                }
+                            }else{
+                                alert("Error desconocido.");
+                            }
+                            $("#jqtblContenido").setGridParam({
+                                'url': "/cronograma/recuperar/?"+$("#frmFiltro").serialize() 
+                            }).trigger("reloadGrid");
+                            $("#fileExcel").removeClass("validate[required]");
+                            $("#fileExcel").change(function(){ $("#frmFiltro").submit(); });
+                        },
+                        error: function (data, status, e){
+                            alert(e);
+                        }
+                    });
+                }else{
+                    $("#jqtblContenido").setGridParam({
+                        'url': "/cronograma/recuperar/?"+$("#frmFiltro").serialize() 
+                    }).trigger("reloadGrid");
+                }
+            }
+        },
+        promptPosition : "bottomLeft", 
+        scroll: false,
+        autoHidePrompt: true,
+        autoHideDelay: 5000
+    });
+    $("#selMotivo").change(function(){
+        $("#selTipo").attr("disabled", false);
+        $("#selTipo").html('');
+        js_mostrarFiltrosMotivo(0);
+        js_mostrarFiltrosTipo(0);
+        switch($("#selMotivo").val()){
+            case "5":
+                $("#selTipo").html('<option value="2">CARGAR EXCEL</option>');
+                js_mostrarFiltrosTipo(2);
+                break;
+            case "2":
+                $("#selTipo").html('<option value="2">CARGAR EXCEL</option><option value="3">INDIVIDUAL</option>');
+                js_mostrarFiltrosTipo(2);
+                break;
+            case "3":
+                $("#selTipo").html('<option value="2">CARGAR EXCEL</option><option value="3">INDIVIDUAL</option>');
+                js_mostrarFiltrosTipo(2);
+                break;
+            case "1":
+                js_mostrarFiltrosMotivo(1);
+                $("#selTipo").html('\n\
+                <option value="1">MASIVA</option><option value="2">CARGAR EXCEL</option><option value="3">INDIVIDUAL</option>\n\
+                ');
+                break;
+            case "4":
+                js_mostrarFiltrosMotivo(2);
+                $("#selTipo").html('\n\
+                <option value="1">MASIVA</option><option value="2">CARGAR EXCEL</option><option value="3">INDIVIDUAL</option>\n\
+                ');
+                break;
+            default:
+                $("#selTipo").html('<option value="">TIPO</option>');
+                $("#selTipo").attr("disabled", true);
+                break;
+        }
+    });
+    $("#selTipo").change(function(){
+        js_mostrarFiltrosTipo(0);
+        switch($("#selTipo").val()){
+            case "1":
+                if($("#selMotivo").val() == 1)
+                    js_mostrarFiltrosMotivo(1);
+                if($("#selMotivo").val() == 4)
+                    js_mostrarFiltrosMotivo(2);
+                js_mostrarFiltrosTipo(0);
+                $("#txtFechaInicio").val("").focus();
+                $("#txtFechaFin").val("");
+                break;
+            case "2":
+                js_mostrarFiltrosMotivo(0);
+                js_mostrarFiltrosTipo(2);
+                $("#fileExcel").val("").focus();
+                break;
+            case "3":
+                js_mostrarFiltrosMotivo(0);
+                js_mostrarFiltrosTipo(1);
+                $("#txtNombres").val("").focus();
+                break;
+        }
+    });
+    $("#txtEdadLimite").keydown(function(tecla){
+        if(tecla.keyCode == 13) {
+            $( "#frmFiltro" ).submit();
+        }
+    });
+    $("#txtNombres").click(function(){
+        this.select();
+    });
+    $("#txtNombres").autocomplete({
+        source: function( request, response ) {
+            $.ajax({
+                url: "/usuario/listarrrhh/",
+                dataType: "json",
+                data: {
+                    term: request.term, 
+                    compania: $('#selCompaniaUsuario').val(),
+                    localidad: $('#selLocalidadUsuario').val()
+                },
+                success: function(data) {
+                    response($.map(data, function(item) {
+                        return {
+                            label: item.Ap_Paterno + " " + item.Ap_Materno + ", " + item.Nombres,
+                            dni: item.DNI,
+                            id: item.Id_cia,
+                            nombres: item.Nombres,
+                            apellidosp: item.Ap_Paterno,
+                            apellidosm: item.Ap_Materno
+                        };
+                    }));
+                }
+            });
+        },
+        minLength: 2,
+        select: function(event, ui) {
+            $('#hdnDNI').val(ui.item.dni);
+            $( "#frmFiltro" ).submit();
+        }
+    });
+    $("#selCompaniaUsuario").change(function(){
+        $.ajax({
+            url: '/localidad/listar/',
+            type: "POST",
+            data: $("#frmFiltro").serialize(),
+            beforeSend:function(){
+                $(".divCargadorPequeno").css("display","inline");
+                $("#selLocalidadUsuario").attr("disabled", true);
+            },
+            success: function(data) {
+                var obj = $("#selLocalidadUsuario");
+                obj.html("");
+                obj.append('<option value="">Seleccione</option>');
+                $.each(jQuery.parseJSON(data), function(i,row){
+                    obj.append('<option value="'+i+'">'+row+'</option>');
+                });
+                $(".divCargadorPequeno").css("display","none");
+                obj.attr("disabled", false);
+            }
+        }); 
+    });
+    $("#txtFechaInicio").datepicker({
+        defaultDate: "0",
+        minDate: "0d",
+        maxDate: "+2m -1d",
+        changeMonth: true,
+        dateFormat: "dd/mm/yy",
+        numberOfMonths: 2,
+        onSelect: function( selectedDate ) {
+            $( "#txtFechaFin" ).datepicker( "option", "minDate", selectedDate );
+            $( "#txtFechaFin" ).attr("disabled", false);
+            if($("#txtFechaFin").val() != "") $( "#frmFiltro" ).submit();
+        }
+    });
+    $("#txtFechaFin").datepicker({
+        defaultDate: "+1w",
+        changeMonth: true,
+        minDate: "0d",
+        maxDate: "+2m -1d",
+        dateFormat: "dd/mm/yy",
+        numberOfMonths: 2,
+        onSelect: function( selectedDate ) {
+            $( "#txtFechaInicio" ).datepicker( "option", "maxDate", selectedDate )
+            if($("#txtFechaInicio").val() != "") $( "#frmFiltro" ).submit();
+        }
+    });
+    $("#jqtblContenido").jqGrid({
+        url: "/cronograma/recuperar/?"+$("#frmFiltro").serialize(),
+        datatype: "json",
+        mtype: 'POST',
+        height: 460,
+        width: 'auto',
+        shrinkToFit: true,
+        colNames:['idDNI', 'Nombres','Apellidos','DNI','Fecha ingreso', 'Puesto', '¿Programado?', 'Detalle'],
+        colModel:[
+                {name:'iddni',          index:'iddni',          hidden: true },
+                {name:'nombres',        index:'nombres',        width:190,  sortable:false, align:'left' },
+                {name:'apellidos',      index:'apellidos',      width:200,  sortable:false, align:'left' },
+                {name:'dni',            index:'dni',            width:123,  sortable:false, align:'center' },
+                {name:'fechaingreso',   index:'fechaingreso',   width:120,  sortable:false, align:'center' },
+                {name:'puesto',         index:'puesto',         width:200,  sortable:false, align:'center' },
+                {name:'programado',     index:'programado',     width:100,  sortable:false, align:'center' },
+                {name:'detalles',       index:'detalles',       width:300,  sortable:false, align:'center' }
+        ],
+        afterInsertRow: function(rowid, aData){
+            $("#"+aData.iddni+" input[type=checkbox]").val(aData.iddni);
+            $("#"+aData.iddni+" input[type=checkbox]").attr("name", "groupcb[]");
+    	},
+        rowNum:10000,
+        rowTotal: 10000,
+        rownumbers: true,
+        gridview: false,
+        multiselect: true,
+        pager: '#jqdivPaginado',
+        viewrecords: true,
+        sortname: 'variable',
+        sortorder: "asc"
+    });
+});
+
+</script>
+

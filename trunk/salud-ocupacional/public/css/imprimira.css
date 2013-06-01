@@ -1,0 +1,313 @@
+div{ float:left; font-family:arial,tahoma; font-size:10px; }
+.divTituloHoja{ text-align:center; font-size:14px; font-weight:bold; }
+.divTituloHojaA{ text-align:center; font-size:22px; font-weight:bold; }
+.divHoja{ width:756px; height:100%; }
+.divHojaL{ width:1070px; height:100%; }
+.divCuadro{ width:19px; height:13px; border:solid 1px #CCC;  }
+.divCuadroF{ margin:0px 3px 3px 3px; width:19px; height:13px; border:solid 1px #CCC;  }
+.divCuadroFA{ margin:0px 12px 3px 15px; width:19px; height:13px; border:solid 1px #CCC;  }
+.divCuadroFAT{ width:40px; height:13px; }
+.divTextoSuelto{ font-size: 13px; }
+.divTextoSueltoA{ font-size: 18px; }
+.divTextoF{ font-size:8px; padding-left:5px; width:100px; height:15px; }
+.divTextoFA{ font-size:8px; padding-left:5px; width:50px; height:15px; }
+.divTextoFB{ font-size:8px; padding-left:5px; width:60px; height:15px; }
+.divTextoFC{ font-size:8px; padding-left:5px; width:80px; height:15px; }
+.divTextoFD{ font-size:8px; padding-left:5px; width:90px; height:15px; }
+.divTextoFE{ font-size:8px; padding-left:5px; width:16px; height:15px; }
+.divTextoFF{ font-size:8px; padding-left:5px; width:300px; height:15px; }
+.divTextoFG{ font-size:8px; padding-left:5px; width:38px; height:15px; }
+.divTextoFH{ padding-left:5px; width:50px; height:15px; }
+.divTextoFI{ font-size:8px; padding-left:5px; width:230px; height:15px; }
+.divTextoFJ{ font-size:8px; padding-left:5px; width:145px; height:15px; }
+.divTextoFK{ font-size:10px; padding-top: 2px; padding-left:5px; width:145px; height:15px; }
+.divTextoFL{ font-size:10px; padding-top: 2px; padding-left:5px; width:90%; height:15px; }
+.divTexto{ padding-left:5px; width:130px; height:15px; }
+.divTexCua{ margin-top:3px; width:95%; text-align:center }
+.divTextoCL{ margin-top:1px; margin-left: 3px; width:95%; }
+.divTextoCA{ margin-top:6px; margin-left: 6px; width:95%; }
+.divTextoCB{ margin-top:6px; margin-left: 6px; width:45%; }
+.divTextoCC{ margin-top:6px; margin-left: 6px; width:25%; }
+.divTextoCD{ margin-top:6px; margin-left: 6px; width:65%; }
+.divTextoCE{ margin-left: 6px; }
+.divTextoCF{ margin-left: 6px; font-size: 12px }
+.divTitulo{ width:100%; height:16px; text-align:center; }
+.divClear{ width:100%; height:10px; }
+.divClearA{ width:100%; height:4px; }
+.divClearB{ width:100%; padding: 5px; }
+.divAttr{ width: 18%; }
+.divVal{ width: 75%; }
+.divAttrA{ width: 24%; }
+.divValA{ width: 74%; font-size: 12px }
+.divF7Cattr{ width: 160px; height: 18px; }
+.divF7CattrA{ margin-left: 15px; width: 70px; height: 18px; }
+.divF7CattrB{ margin-top:6px; margin-left: 15px; width: 100px; height: 18px; }
+.divF7CattrC{ margin-top:6px; margin-left: 15px; width: 90%; height: 18px; }
+.divF7CattrD{ margin-top:2px; margin-left: 5px; width: 90%; height: 18px; }
+.divF7Cval{ width: 580px; height: 18px; }
+.divF7CvalA{ width: 80px; height: 18px; } 
+.divF7CvalB{ margin-top:6px; width: 180px; height: 18px; }
+.dbIzq{ border-left:solid 1px #000; }
+.dbDer{ border-right:solid 1px #000; }
+.dbSup{ border-top:solid 1px #000; }
+.dbInf{ border-bottom:solid 1px #000; }
+
+
+#divF7Clogo{ width:140px; height:65px; }
+#divF7Ctitulo{ width:440px; height:65px; }
+#divF7Ctipoexamen{ width:175px; height:65px; }
+#divF7C1{ width:190px; height:70px; }
+#divF7C2{ width:160px; height:70px; }
+#divF7C3{ width:130px; height:70px; }
+#divF7C4{ width:270px; height:70px; }
+#divF7C5{ width:40px; height:70px; }
+#divF7C6{ width:80px; height:70px; }
+#divF7C7{ width:110px; height:70px; }
+#divF7C8{ width:180px; height:70px; }
+#divF7C9{ width:339px; height:70px; }
+#divF7C10{ width:482px; height:70px; }
+#divF7C11{ width:270px; height:70px; }
+#divF7C12{ width:753px; height:70px; }
+#divF7C13{ width:753px; height:70px; }
+#divF7C14{ width:310px; height:70px; }
+#divF7C15{ width:300px; height:70px; }
+#divF7CGA{ width:142px; height:70px; }
+#divF7C16{ width:142px; height:22px; }
+#divF7C17{ width:70px; height:22px; }
+#divF7C18{ width:69px; height:22px; }
+#divF7C19{ width:70px; height:25px; }
+#divF7C20{ width:69px; height:25px; }
+#divF7C21{ width:190px; height:100px; } 
+#divF7CGB{ width:190px; height:100px; }
+#divF7C22{ width:94px; height:50px; } 
+#divF7C23{ width:94px; height:50px; } 
+#divF7C24{ width:190px; height:48px; } 
+#divF7C25{ width:190px; height:100px; } 
+#divF7C26{ width:180px; height:20px; } 
+#divF7C27{ width:180px; height:67px; } 
+#divF7C28{ width:375px; height:50px; } 
+#divF7C29{ width:376px; height:50px; } 
+#divF7C30{ width:375px; height:50px; } 
+#divF7C31{ width:376px; height:50px; } 
+#divF7C32{ width:126px; height:46px; } 
+#divF7CGD{ width:123px; height:46px; }
+#divF7C33{ width:121px; height:23px; } 
+#divF7C34{ width:60px; height:23px; } 
+#divF7C35{ width:60px; height:23px; } 
+#divF7CGE{ width:124px; height:46px; }
+#divF7C36{ width:121px; height:23px; } 
+#divF7C37{ width:60px; height:23px; } 
+#divF7C38{ width:60px; height:23px; } 
+#divF7C39{ width:379px; height:46px; } 
+#divF7C40{ width:752px; height:20px; }
+#divF7C41{ width:752px; height:70px; }
+#divF7C42{ width:60px; height:35px; }
+#divF7CGF{ width:300px; height:35px; }
+#divF7C43{ width:35px; height:15px; }
+#divF7C44{ width:20px; height:35px; }
+#divF7C45{ width:187px; height:65px; }
+#divF7C46{ width:753px; height:35px; }
+#divF7C47{ width:452px; height:35px; }
+#divF7C48{ width:300px; height:35px; }
+#divF7C49{ width:502px; height:60px; }
+#divF7C50{ width:250px; height:60px; }
+#divF7C51{ width:250px; height:35px; }
+#divF7C52{ width:250px; height:35px; }
+#divF7C53{ width:250px; height:35px; }
+#divF7C54{ width:200px; height:280px; }
+#divF7C55{ width:552px; height:280px; }
+#divF7CGG{ width:488px; height:35px; }
+#divF7C56{ width:80px; height:23px; } 
+#divF7C57{ width:80px; height:23px; } 
+#divF7C58{ width:80px; height:46px; } 
+#divF7CGH{ width:570px; height:46px; }
+#divF7C59{ width:404px; height:70px; }
+#divF7C60{ width:80px; height:70px; } 
+#divF7CGI{ width:185px; height:46px; }
+#divF7C61{ width:184px; height:60px; }
+#divF7C62{ width:184px; height:57px; }
+#divF7CGJ{ width:569px; height:320px; }
+#divF7C63{ width:382px; height:50px; }
+#divF7C64{ width:183px; height:50px; }
+#divF7C65{ width:183px; height:65px; }
+#divF7C66{ width:382px; height:65px; }
+#divF7C67{ width:566px; height:75px; }
+#divF7C68{ width:566px; height:75px; }
+#divF7C69{ width:184px; height:100px; }
+#divF7C70{ width:184px; height:134px; }
+#divF7C71{ width:184px; height:31px; }
+
+#divF7D1{ width:140px; height:65px; }
+#divF7D2{ width:610px; height:65px; }
+#divF7D3{ width:750px; height:20px; }
+#divF7D4{ width:200px; height:34px; }
+#divF7D5{ width:190px; height:34px; }
+#divF7D6{ width:190px; height:34px; }
+#divF7D7{ width:167px; height:34px; }
+#divF7D8{ width:382px; height:25px; }
+#divF7D9{ width:367px; height:25px; }
+#divF7D10{ width:148px; height:20px; }
+#divF7D11{ width:154px; height:20px; }
+#divF7D12{ width:456px; height:30px; }
+#divF7D13{ width:145px; height:30px; }
+#divF7D14{ width:145px; height:30px; }
+#divF7D12 .divTitulo, #divF7D13 .divTitulo, #divF7D14 .divTitulo{ margin-top: 6px; }
+#divF7CGK{ width:500px; height:95px; }
+#divF7D15{ width:498px; height:20px; }
+#divF7D16{ width:248px; height:70px; }
+#divF7D17{ width:248px; height:70px; }
+#divF7D18{ width:251px; height:90px; }
+
+#divFHO1{ width:140px; height:65px; }
+#divFHO2{ width:880px; height:45px; padding-top: 20px; padding-right: 50px; }
+#divFHO3{ width:100px; height:25px; }
+#divFHO4{ width:220px; height:25px; }
+#divFHO5{ width:140px; height:25px; }
+#divFHO6{ width:120px; height:34px; }
+#divFHO7{ width:130px; height:34px; }
+#divFHO8{ width:60px; height:34px; }
+#divFHO9{ width:120px; height:34px; }
+#divFHO10{ width:120px; height:34px; }
+#divFHO11{ width:140px; height:34px; }
+#divFHO12{ width:79px; height:12px; }
+#divFHO13{ width:79px; height:12px; }
+#divFHO14{ width:100px; height:34px; }
+#divFHO15{ width:100px; height:15px; }
+#divFHO16{ width:120px; height:455px; }
+#divFHO17{ width:130px; height:455px; }
+#divFHO18{ width:60px; height:455px; }
+#divFHO19{ width:120px; height:455px; }
+#divFHO20{ width:120px; height:455px; }
+#divFHO21{ width:140px; height:455px; }
+#divFHO22{ width:79px; height:455px; }
+#divFHO23{ width:79px; height:455px; }
+#divFHO24{ width:100px; height:455px; }
+#divFHO25{ width:100px; height:455px; }
+#divFHO26{ width:158px; height:12px; }
+#divF7CGL{ width:160px; height:34px; }
+#divF7CGM{ width:105px; height:34px; }
+#divFHO27{ width:308px; height:12px; }
+#divFHO28{ width:308px; height:12px; }
+
+#divFEM1{ width:140px; height:65px; }
+#divFEM2{ width:580px; height:45px; }
+#divFEM3{ width:70px; height:48px; }
+#divFEMGA{ width:450px; height:34px; }
+#divFEM4{ width:170px; height:20px; }
+#divFEM5{ width:220px; height:20px; }
+#divFEM6{ width:50px; height:20px; }
+#divFEM7{ width:170px; height:28px; }
+#divFEM8{ width:220px; height:28px; }
+#divFEM9{ width:50px; height:28px; }
+#divFEMGB{ width:230px; height:34px; }
+#divFEM10{ width:230px; height:20px; }
+#divFEM11{ width:230px; height:28px; }
+#divFEM12{ width:410px; height:35px; }
+#divFEM13{ width:146px; height:35px; }
+#divFEM14{ width:190px; height:35px; }
+#divFEMGC{ width:366px; height:34px; }
+#divFEM15{ width:120px; height:16px; }
+#divFEM16{ width:60px; height:16px; }
+#divFEM17{ width:10px; height:86px; }
+#divFEMGC{ width:370px; height:34px; }
+#divFEM18{ width:184px; height:16px; }
+#divFEM19{ width:302px; height:16px; }
+#divFEM20{ width:30px; height:16px; }
+#divFEM21{ width:121px; height:16px; }
+#divFEM22{ width:122px; height:16px; }
+#divFEM23{ width:10px; height:35px; }
+#divFEM24{ width:61px; height:16px; }
+#divFEM25{ width:10px; height:121px; }
+#divFEM26{ width:305px; height:16px; }
+#divFEM27{ width:61px; height:16px; }
+#divFEM28{ width:10px; height:346px; }
+#divFEM29{ width:244px; height:16px; }
+#divFEM30{ width:244px; height:30px; }
+#divFEM31{ width:60px; height:30px; }
+#divFEM32{ width:348px; height:176px; padding:9px; }
+#divFEM33{ width:745px; height:30px; }
+#divFEMGD{ width:370px; height:34px; }
+#divFEM34{ width:370px; height:50px; }
+#divFEM35{ width:370px; height:120px; }
+#divFEM36{ width:376px; height:170px; }
+#divFEM37{ width:100%; height:50px; }
+#divFEM38{ width:10%; height:25px; }
+#divFEM39{ width:84%; height:25px; }
+#divFEM40{ width:10%; height:25px; }
+#divFEM41{ width:30%; height:25px; }
+#divFEM42{ width:10%; height:25px; }
+#divFEM43{ width:50%; height:25px; }
+
+#divFLA1{ width:20%; height:20px; }
+#divFLA2{ width:79%; height:20px; }
+#divFLA3{ width:100%; height:20px; }
+#divFLA4{ width:100%; height:275px; }
+#divFLA5{ width:100px; height:20px; margin-left: 10px; }
+#divFLA6{ width:100px; height:20px; margin-left: 10px; }
+#divFLA7{ width:100px; height:20px; margin-left: 10px; }
+#divFLA8{ width:400px; height:20px; margin-left: 10px; }
+#divFLA9{ width:700px; height:20px; margin-left: 10px; }
+#divFLA10{ width:12%; height:20px; margin-left: 10px; }
+#divFLA11{ width:34%; height:20px; margin-left: 10px; }
+#divFLA12{ width:47%; height:20px; margin-left: 10px; }
+#divFLA13{ width:100%; height:265px; }
+
+#divFME1{ width:20%; height:20px; }
+#divFME2{ width:63%; height:20px; }
+#divFME3{ width:340px; height:60px; margin-left: 50px; }
+#divFME4{ width:300px; height:60px; padding-left: 10px; }
+#divFME5{ width:640px; height:220px; margin-left: 50px; }
+
+#divFPV3{ width:640px; height:30px; padding-left: 50px; }
+#divFPV4{ width:640px; height:30px; padding-left: 50px; }
+#divFPV5{ width:640px; height:220px; margin-left: 50px; }
+
+#divFPV6{ width:640px; height:50px; margin-left: 50px; }
+#divFPV7{ width:630px; height:30px; margin-left: 50px; padding: 5px;}
+#divFPV8{ width: 600px; margin-left: 20px; }
+
+/*******************************************************/
+.odontoletra{
+    float: left; height: 20px; width: 30px; text-align: center
+}
+.odontodientea{
+    float: left; height: 30px; width: 30px; 
+}
+.odontodienteb{
+    float: left; height: 30px; width: 30px; 
+}
+.odontosup{
+    float: left; height: 70px; cursor: pointer;
+}
+.odontoinf{
+    float: left; height: 60px; cursor: pointer;
+}
+div.clearFloatodonto {
+    clear: both;
+    font-size: 0;
+    height: 0;
+    line-height: 0px;
+}
+div.clearFloatLimite {
+    clear: both;
+    font-size: 0;
+    height: 0;
+    line-height: 0px;
+    border: solid 1px #555;
+    width: 510px;
+}
+.odontoTituloSimbolo{
+    float: left; display: block; width: 321px; font-size: 14px; font-weight: bold; height: 23px; padding-top: 7px; padding-left: 7px; background-color: #F5F5F5
+}
+.odontoSimbolo{
+    float: left; display: block; width: 318px; padding: 5px;
+}
+.odontoSimbolo img{
+    vertical-align: top
+}
+.odontopieza .simbdiente{
+    position: relative;
+}
+.odontopiezab .simbdiente{
+    position: relative;
+}

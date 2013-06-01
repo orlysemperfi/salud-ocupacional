@@ -1,0 +1,346 @@
+<div id="divBarraTitulo">
+    Pantalla de visualización
+</div>
+<div id="divBarraHerramientas">
+    <div class="divIzquierda" style="width: 70% !important">
+        <button name="btnNuevo" id="btnNuevo">Nueva Ubicación</button>
+        <button name="btnActualizar" id="btnActualizar">Actualizar</button>
+        <div id="divMensaje" style="display: inline"></div>
+    </div>
+    <div class="divDerecha" style="width: 30% !important">
+        <div id="divMensajeGeneral" class="divDialogTitulo ui-state-highlight ui-corner-all oculto">
+        </div>
+    </div>
+</div>
+<div id="divGrilla">
+    <table id="jqtblContenido"></table>
+    <div id="jqdivPaginado"></div>
+</div>
+<div class="contextMenu" id="MenuJqGrid">
+    <ul>
+        <li id="modificar">Modificar</li>
+        <li id="eliminar">Eliminar</li>
+    </ul>
+</div>
+<div id="dialogNuevoUsuario" title="Nueva Ubicación" class="dialogForms" style="overflow: hidden"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Ingrese la información requerida:
+    </div>
+    <div id="divDialogContenido">
+        <form action="" method="post" id="frmNuevoUsuario" name="frmNuevoUsuario">
+            <table id="tblNuevoUsuario" style="width:349px">
+                <tr>
+                    <td width="129" class="txtDer">Compañia</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq">
+                        <select id="selCompaniaUsuario" name="selCompaniaUsuario" class="validate[required]">
+                            <option value="">Seleccione</option>
+                            <?php
+                            foreach($this->rstListarCompania as $row){
+                                echo '<option value="'.$row["idCompania"].'">'.$row["nombre"].'</option>';
+                            }
+                            ?>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Localidad</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq">
+                        <select id="selLocalidadUsuario" name="selLocalidadUsuario" class="validate[required]">
+                            <option value="">Seleccione</option>
+                        </select>
+                        <div class="divCargadorPequeno" style="display:none"> <img src="/images/cargando.gif" /></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">IP</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtIP" name="txtIP" maxlength="15" class="validate[required, custom[ipv4]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Descripción</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtDescripcion" name="txtDescripcion" maxlength="50" class="validate[required, minSize[3]]" /></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+<div id="dialogModificarUsuario" title="Modificar Ubicación" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        Ingrese la información requerida:
+    </div>
+    <div id="divDialogContenido">
+        <form action="" method="post" id="frmModificarUsuario" name="frmModificarUsuario">
+            <input type="hidden" id="hdnIdIP" name="hdnIdIP" />
+            <input type="hidden" id="hdnOpcion" name="hdnOpcion" value="2" />
+            <table id="tblModificarUsuario" style="width:349px">
+                <tr>
+                    <td width="129" class="txtDer">IP</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtIP" name="txtIP" maxlength="15" class="validate[required, custom[ipv4]]" /></td>
+                </tr>
+                <tr>
+                    <td width="129" class="txtDer">Descripción</td>
+                    <td width="10"></td>
+                    <td width="220" class="txtIzq"><input type="text" id="txtDescripcion" name="txtDescripcion" maxlength="50" class="validate[required, minSize[3]]" /></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+<div id="dialogEliminarUsuario" title="Eliminar Ubicación" class="dialogForms"> 
+    <div class="divDialogTitulo ui-state-highlight ui-corner-all">
+        ¿Está seguro de eliminar este registro?
+    </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#jqtblContenido").jqGrid({
+        url: "/maestro/listarip/",
+        datatype: "json",
+        mtype: "POST",
+        height: 460, 
+        width: "auto",
+        shrinkToFit: true,
+        colNames:["idIp","idCompania","idLocalidad","Compañía","Localidad", "IP", "Descripción"],
+        colModel:[
+                {name:'idIp',       index:'idIp',       hidden: true },
+                {name:'idCompania', index:'idCompania', hidden: true },
+                {name:'idLocalidad',index:'idLocalidad',hidden: true },
+                {name:'compania',   index:'compania',   width:250,  sortable:false, align:'left' },
+                {name:'localidad',  index:'localidad',  width:250,  sortable:false, align:'left' },
+                {name:'ip',         index:'ip',         width:250,  sortable:false, align:'left' },
+                {name:'descripcion',index:'descripcion',width:520,  sortable:false, align:'left' }
+        ],
+        gridComplete: function() {
+            var registros = $("#jqtblContenido").getRowData();
+            var c = 0;
+            var id = "";
+            while(c < registros.length){
+                id = registros[c].idIp;
+                $("#"+id).contextMenu("MenuJqGrid", eventsMenu);
+                c++;
+            }
+        },
+        rowNum:2000,
+        rowTotal: 10000,
+        rownumbers: true,
+        loadonce: false,
+        ignoreCase: true,
+        gridview: false,
+        viewrecords: true
+    });
+    $("#selCompaniaUsuario").change(function(){
+        $.ajax({
+            url: '/localidad/listar/',
+            type: "POST",
+            data: $("#frmNuevoUsuario").serialize(),
+            beforeSend:function(){
+                $(".divCargadorPequeno").css("display","inline");
+                $("#selLocalidadUsuario").attr("disabled", true);
+            },
+            success: function(data) {
+                var obj = $("#selLocalidadUsuario");
+                obj.html("").append("<option value=''>Seleccione</option>");
+                $.each($.parseJSON(data), function(i,row){
+                    obj.append("<option value='"+i+"'>"+row+"</option>");
+                });
+                $(".divCargadorPequeno").css("display","none");
+                obj.attr("disabled", false);
+                $(objDNU + " #txtApellidos").attr("disabled", true).val("");
+                $(objDNU + " #txtNombres").val("");
+            }
+        }); 
+    });
+    var objDNU = "#dialogNuevoUsuario";
+    $("#btnActualizar")
+        .button({ icons: { primary: "ui-icon-refresh" } })
+        .click(function(){ $("#jqtblContenido").trigger("reloadGrid"); $("#jqtblContenidos").trigger("reloadGrid"); });
+    $("#btnNuevo")
+        .button({ icons: { primary: "ui-icon-plus" } })
+        .click(function(){
+        $(objDNU).dialog("open"); 
+    });
+    $(objDNU).dialog({
+        closeOnEscape: false,
+        autoOpen: false,
+        height: 280,
+        width: 370,
+        modal: true,
+        resizable: false,
+        open: function(){
+            js_resetForm(objDNU);
+            $(objDNU + " #txtIP").focus();
+            js_validarDNU();
+        },
+        buttons:{
+            "Guardar": function(){ $("#frmNuevoUsuario").submit(); },
+            "Cancelar": function(){ $(this).dialog("close"); }
+        },
+        close: function() { $("#frmNuevoUsuario").validationEngine("hideAll"); }
+    });
+    var objDMU = "#dialogModificarUsuario";
+    $(objDMU).dialog({
+        closeOnEscape: false,
+        autoOpen: false,
+        height: 240,
+        width: 370,
+        modal: true,
+        resizable: false,
+        open: function(){
+            js_resetForm(objDMU);
+        },
+        buttons:{
+            "Guardar": function(){ $("#frmModificarUsuario").submit(); },
+            "Cancelar": function(){ $(this).dialog("close"); }
+        },
+        close: function() { $("#frmModificarUsuario").validationEngine("hideAll"); }
+    });
+    var objDEU = "#dialogEliminarUsuario";
+    $(objDEU).dialog({
+        closeOnEscape: false,
+        autoOpen: false,
+        height: 160,
+        width: 370,
+        modal: true,
+        resizable: false,
+        buttons:{
+            "Sí": function(){ 
+                $.ajax({
+                    url: '/maestro/eliminarip/',
+                    type: "POST",
+                    data: "idIP=" + idIP,
+                    success: function(data) {
+                        $("#jqtblContenido").trigger("reloadGrid");
+                        $("#jqtblContenidos").trigger("reloadGrid");
+                        js_mensajeGeneral(data);
+                        $(objDEU).dialog("close");
+                    }
+                });
+            },
+            "No": function(){ $(this).dialog("close"); }
+        }
+    });
+    eventsMenu = {
+        bindings:{
+            'modificar':function(t){
+                idIP = t.id;
+                var contenidoaux;
+                $(objDMU).dialog("open");
+                $.ajax({
+                    url: '/maestro/modificarip/',
+                    type: "POST",
+                    data: "hdnIdIP=" + idIP + "&hdnOpcion=1",
+                    beforeSend:function(){
+                        contenidoaux = $(objDMU + " #divDialogContenido").html();
+                        $(objDMU + " #divDialogContenido").html(msjCargando);
+                    },
+                    success: function(data) {
+                        var objs = $.parseJSON(data);
+                        $(objDMU + " #divDialogContenido").html(contenidoaux);
+                        $(objDMU + " #hdnIdIP").val(objs.idIP);
+                        $(objDMU + " #txtIP").val(objs.ip);
+                        $(objDMU + " #txtDescripcion").val(objs.descripcion);
+                        $(objDMU + " #txtIP").focus();
+                        js_validarDMU();
+                    }
+                });
+            },
+            'eliminar':function(t){
+                idIP = t.id;
+                $(objDEU).dialog("open");
+            }
+        },
+        onShowMenu: function(e, menu) {
+            var obj = $(e.target).parent().find("td[aria-describedby=jqtblContenido_idRol]").html();
+            if(obj == 14){
+                $('#eliminar', menu).remove();
+            }
+            return menu;
+        }
+    }
+    var idIP;
+    var msjCargando = "<div id='divCargadorPrincipal'><img src='/images/loading.gif' /><br>Cargando...</div>";
+    
+    function js_validarDNU(){
+        $("#frmNuevoUsuario").validationEngine("attach");
+        $("#frmNuevoUsuario").validationEngine("attach", {
+                onValidationComplete: function(form, status){
+                    if(status){
+                        $.ajax({
+                            url: '/maestro/registrarip/',
+                            type: "POST",
+                            data: $("#frmNuevoUsuario").serialize(),
+                            beforeSend:function(){
+                                $("#frmNuevoUsuario").validationEngine("detach");
+                            },
+                            success: function(data) {
+                                var objs = $.parseJSON(data);
+                                if(objs.status == 1){
+                                    $("#jqtblContenido").trigger("reloadGrid");
+                                    $("#dialogNuevoUsuario").dialog("close");
+                                    js_mensajeGeneral(data);
+                                }else{
+                                    js_validarDNU();
+                                }
+                            }
+                        });
+                    }
+                },
+                promptPosition : "topLeft", 
+                scroll: false,
+                autoHidePrompt: true,
+                autoHideDelay: 1000
+            }
+        );
+    }
+    function js_validarDMU(){
+        $("#frmModificarUsuario").validationEngine("attach");
+        $("#frmModificarUsuario").validationEngine("attach", {
+                onValidationComplete: function(form, status){
+                    if(status){
+                        $.ajax({
+                            url: '/maestro/modificarip/',
+                            type: "POST",
+                            data: $("#frmModificarUsuario").serialize(),
+                            beforeSend:function(){
+                                $("#frmModificarUsuario").validationEngine("detach");
+                            },
+                            success: function(data) {
+                                var objs = $.parseJSON(data);
+                                if(objs.status == 1){
+                                    $("#jqtblContenido").trigger("reloadGrid");
+                                    $("#dialogModificarUsuario").dialog("close");
+                                    js_mensajeGeneral(data);
+                                }else{
+                                    js_validarDMU();
+                                }
+                            }
+                        });
+                    }
+                },
+                promptPosition : "topLeft", 
+                scroll: false,
+                autoHidePrompt: true,
+                autoHideDelay: 1000
+            }
+        );
+    }
+});
+function js_mensajeGeneral(data){
+    var objs = $.parseJSON(data);
+    var divMensaje = $("#divMensajeGeneral");
+    divMensaje.css("display","block");
+    divMensaje.css("padding","7px");
+    divMensaje.css("margin","0px");
+    divMensaje.html("");
+    divMensaje.html(objs.message);
+    setTimeout("js_mensajeGeneralOculta()", 3000);
+}
+function js_mensajeGeneralOculta(){
+    var divMensaje = $("#divMensajeGeneral");
+    divMensaje.css("display","none");
+}
+</script>

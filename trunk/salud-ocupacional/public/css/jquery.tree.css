@@ -1,0 +1,15 @@
+.daredevel-tree li {
+    list-style-type: none;
+    position: relative;
+}
+
+.daredevel-tree li span.daredevel-tree-label {
+    cursor: default;
+    z-index: 1;
+}
+.daredevel-tree ul{
+    margin-left: -20px;
+}
+.daredevel-tree input[type=checkbox]{
+    width: auto;
+}
