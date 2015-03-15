@@ -1,0 +1,1 @@
+Sistema de Seguimiento y Control de Incidentes en Salud Ocupacional
